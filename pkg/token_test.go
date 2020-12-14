@@ -66,6 +66,10 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 			gomega.Expect(recClaim).NotTo(gomega.BeNil())
 			gomega.Expect(recClaim.PersonalClaim).To(gomega.BeAssignableToTypeOf(&AuthxClaim{}))
 			gomega.Expect(recClaim.PersonalClaim).To(gomega.BeEquivalentTo(pc))
+			recoveredPC, ok := recClaim.PersonalClaim.(*AuthxClaim)
+			gomega.Expect(ok).To(gomega.BeTrue())
+			gomega.Expect(recoveredPC).NotTo(gomega.BeNil())
+			gomega.Expect(recoveredPC).To(gomega.Equal(pc))
 
 		})
 		ginkgo.It("The recover claim with refresh claim", func() {
