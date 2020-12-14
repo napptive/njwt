@@ -68,5 +68,21 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 			gomega.Expect(recClaim.PersonalClaim).To(gomega.BeEquivalentTo(pc))
 
 		})
+		ginkgo.It("The recover claim with refresh claim", func() {
+			pc := NewRefreshClaim("userID", "tokenID")
+			claim := NewClaim("tt", time.Hour, pc)
+
+			secret := "secret"
+			token, err := tokenMgr.Generate(claim, secret)
+			gomega.Expect(err).To(gomega.Succeed())
+			gomega.Expect(token).NotTo(gomega.BeNil())
+
+			recClaim, err := tokenMgr.Recover(*token, secret, &RefreshClaim{})
+			gomega.Expect(err).To(gomega.Succeed())
+			gomega.Expect(recClaim).NotTo(gomega.BeNil())
+			gomega.Expect(recClaim.PersonalClaim).To(gomega.BeAssignableToTypeOf(&RefreshClaim{}))
+			gomega.Expect(recClaim.PersonalClaim).To(gomega.BeEquivalentTo(pc))
+
+		})
 	})
 })
