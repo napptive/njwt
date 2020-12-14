@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package config
+package njwt
 
 import (
 	"testing"
@@ -23,8 +23,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestConfigPackage(t *testing.T) {
+ func TestNJWT(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "Config package suite")
+	ginkgo.RunSpecs(t, "NJWT Suite")
 }
-
