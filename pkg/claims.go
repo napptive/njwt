@@ -25,6 +25,7 @@ import (
 //Claim is the basic standard Claim
 type Claim struct {
 	jwt.StandardClaims
+	// PersonalClaim contains the related information with the Napptive platform.
 	PersonalClaim interface{} `json:"pc,omitempty"`
 }
 
@@ -43,7 +44,9 @@ func NewClaim(issuer string, expiration time.Duration, pc interface{}) *Claim {
 
 // AuthxClaim is the information stored by Authx in the claim.
 type AuthxClaim struct {
+	// UserID internal napptive user identificator.
 	UserID   string
+	// Username is the unique name of the user, currently the github account name.
 	Username string
 }
 
