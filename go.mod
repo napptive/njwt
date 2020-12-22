@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/golang/mock v1.3.1
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/napptive/grpc-ping-go v0.1.0
 	github.com/napptive/mockup-generator v0.0.0-20201221110033-aff9074445d8

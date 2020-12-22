@@ -18,7 +18,7 @@ package interceptors
 import (
 	"context"
 	"fmt"
-	grpc_ping_go "github.com/napptive/grpc-ping-go"
+	"github.com/napptive/grpc-ping-go"
 	"github.com/napptive/mockup-generator/pkg/mockups"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"

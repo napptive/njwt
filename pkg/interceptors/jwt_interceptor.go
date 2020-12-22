@@ -18,7 +18,8 @@ package interceptors
 
 import (
 	"context"
-	"github.com/napptive/nerrors/pkg/nerrors"
+	"errors"
+	"fmt"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
 	"google.golang.org/grpc"
@@ -45,14 +46,14 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 
 		authClaim, err := authorizeJWTToken(ctx, config)
 		if err != nil {
-			return nil, nerrors.FromError(err).ToGRPC()
+			return nil, err
 		}
 
 		// add the claim information to the context metadata
 		md := metadata.New(map[string]string{UserId: authClaim.UserID, Username: authClaim.Username})
 		oldMD, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
+			return nil, errors.New("error recovering metadata")
 		}
 		// adds the new metadata to the old one
 		fullMD := metadata.Join(oldMD, md)
@@ -67,18 +68,18 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.AuthxClaim, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, nerrors.NewInvalidArgumentError("retrieving metadata failed")
+		return nil, errors.New("retrieving metadata failed")
 	}
 
 	token, ok := md[config.Header]
 	if !ok {
-		return nil, nerrors.NewInvalidArgumentError("no auth details supplied")
+		return nil, errors.New("no auth details supplied")
 	}
 
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
 	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
-		return nil, nerrors.NewInvalidArgumentErrorFrom(err, "error recovering token")
+		return nil, errors.New(fmt.Sprintf("error recovering token [%s]", err.Error()))
 	}
 
 	return &pc, nil
