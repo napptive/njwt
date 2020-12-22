@@ -53,7 +53,7 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		md := metadata.New(map[string]string{UserId: authClaim.UserID, Username: authClaim.Username})
 		oldMD, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, errors.New("error recovering metadata")
+			return nil, fmt.Errorf("error recovering metadata")
 		}
 		// adds the new metadata to the old one
 		fullMD := metadata.Join(oldMD, md)
@@ -79,7 +79,7 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
 	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
-		return nil, errors.New(fmt.Sprintf("error recovering token [%s]", err.Error()))
+		return nil, fmt.Errorf("error recovering token [%s]", err.Error())
 	}
 
 	return &pc, nil
