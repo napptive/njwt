@@ -15,8 +15,18 @@ The purpose of this project is to provide a simple JWT library to handle the aut
      recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
      recoveredPC, ok := recClaim.PersonalClaim.(*AuthxClaim)
 ```
+#### JWT Interceptor
+this interceptor validates a JWT token received
+```
+cfg := config.JWTConfig{
+   Secret: "mysecret",
+   Header: "authorization",
+}
 
-
+var s *grpc.Server
+...
+s = grpc.NewServer(interceptor.WithServerJWTInterceptor(config))
+```
 ## Badges
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/81607aa743e2644b935d/maintainability)](https://codeclimate.com/repos/5fd7b06e61ed8150ec009a16/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/81607aa743e2644b935d/test_coverage)](https://codeclimate.com/repos/5fd7b06e61ed8150ec009a16/test_coverage)
