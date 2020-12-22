@@ -52,7 +52,7 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		}
 
 		// add the claim information to the context metadata
-		md := metadata.New(map[string]string{UserId: authClaim.UserID, Username: authClaim.Username})
+		md := metadata.New(map[string]string{UserIdKey: authClaim.UserID, UsernameKey: authClaim.Username})
 		oldMD, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
 			return nil, fmt.Errorf("error recovering metadata")

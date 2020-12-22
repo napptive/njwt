@@ -44,11 +44,11 @@ func (p pingHandler) Ping (ctx context.Context, request *grpc_ping_go.PingReques
 	if !ok {
 		return nil, nerrors.NewInternalError("no metadata found").ToGRPC()
 	}
-	_, exists :=  md[UserId]
+	_, exists :=  md[UserIdKey]
 	if ! exists {
 		return nil, nerrors.NewInternalError("userId not found in metadata").ToGRPC()
 	}
-	_, exists =  md[Username]
+	_, exists =  md[UsernameKey]
 	if ! exists {
 		return nil, nerrors.NewInternalError("username not found in metadata").ToGRPC()
 	}
