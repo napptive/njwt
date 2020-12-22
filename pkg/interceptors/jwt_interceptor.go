@@ -27,8 +27,10 @@ import (
 )
 
 const (
-	UserId   = "user_id"
-	Username = "username"
+        // UserIdKey with the name of the key that will be injected in the context metadata corresponding to the user identifier.
+	UserIdKey   = "user_id"
+        // UsernameKey with the name of the key that will be injected in the context metadata corresponding to the username.
+	UsernameKey = "username"
 )
 
 // WithServerJWTInterceptor creates a gRPC interceptor that verifies the JWT received is valid
