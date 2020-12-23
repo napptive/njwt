@@ -40,7 +40,7 @@ func NewJWTConfig (secret string, header string) JWTConfig {
 
 func (jc JWTConfig) IsValid () error {
 	if jc.Secret == "" {
-		return nerrors.NewInvalidArgumentError("secret mus be filled")
+		return nerrors.NewInvalidArgumentError("secret must be filled")
 	}
 	if jc.Header == "" {
 		return nerrors.NewInvalidArgumentError("header mus be filled")
