@@ -38,6 +38,7 @@ func NewJWTConfig (secret string, header string) JWTConfig {
 	}
 }
 
+// IsValid checks if the configuration options are valid.
 func (jc JWTConfig) IsValid () error {
 	if jc.Secret == "" {
 		return nerrors.NewInvalidArgumentError("secret must be filled")
