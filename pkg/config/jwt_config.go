@@ -31,6 +31,7 @@ type JWTConfig struct {
 	Header string
 }
 
+// NewJWTConfig creates a config object with a given secret and header.
 func NewJWTConfig (secret string, header string) JWTConfig {
 	return JWTConfig{
 		Secret: secret,
