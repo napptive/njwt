@@ -48,10 +48,18 @@ func (p pingHandler) Ping (ctx context.Context, request *grpc_ping_go.PingReques
 	if ! exists {
 		return nil, nerrors.NewInternalError("userId not found in metadata").ToGRPC()
 	}
-	_, exists =  md[UsernameKey]
+	_ , exists =  md[UsernameKey]
 	if ! exists {
 		return nil, nerrors.NewInternalError("username not found in metadata").ToGRPC()
 	}
+
+	user, err := GetClaimFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Print()
+
 
 	// return the response
 	return &grpc_ping_go.PingResponse{

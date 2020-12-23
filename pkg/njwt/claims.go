@@ -17,6 +17,7 @@
 package njwt
 
 import (
+	"github.com/rs/zerolog/log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -53,6 +54,10 @@ type AuthxClaim struct {
 // NewAuthxClaim creates a new instance of AuthxClaim.
 func NewAuthxClaim(userID string, username string) *AuthxClaim {
 	return &AuthxClaim{UserID: userID, Username: username}
+}
+
+func (a AuthxClaim) Print () {
+	log.Info().Str("userID", a.UserID).Str("username", a.Username).Msg("AuthxClaim")
 }
 
 // RefreshClaim is the information stored to create the refresh token.
