@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
 	"google.golang.org/grpc"
@@ -85,4 +86,27 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 	}
 
 	return &pc, nil
+}
+
+// GetClaimFromContext gets user info from context
+func GetClaimFromContext (ctx context.Context) (*njwt.AuthxClaim, error) {
+
+	// check that the user id and username are in the metadata
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, nerrors.NewInternalError("no metadata found")
+	}
+	userId, exists :=  md[UserIdKey]
+	if ! exists {
+		return nil, nerrors.NewInternalError("userId not found in metadata")
+	}
+	username, exists :=  md[UsernameKey]
+	if ! exists {
+		return nil, nerrors.NewInternalError("username not found in metadata").ToGRPC()
+	}
+
+	return &njwt.AuthxClaim{
+		UserID:   userId[0],
+		Username: username[0],
+	}, nil
 }

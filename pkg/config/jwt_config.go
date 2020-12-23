@@ -17,10 +17,38 @@
 
 package config
 
+import (
+	"github.com/napptive/nerrors/pkg/nerrors"
+	"github.com/rs/zerolog/log"
+	"strings"
+)
+
 // JWT with the JWT configuration
 type JWTConfig struct {
 	// Secret with the token secret, used to recover the token
 	Secret string
 	// Header with the metadata field where the token is stored
 	Header string
+}
+
+func NewJWTConfig (secret string, header string) JWTConfig {
+	return JWTConfig{
+		Secret: secret,
+		Header: header,
+	}
+}
+
+func (jc JWTConfig) IsValid () error {
+	if jc.Secret == "" {
+		return nerrors.NewInvalidArgumentError("secret mus be filled")
+	}
+	if jc.Header == "" {
+		return nerrors.NewInvalidArgumentError("header mus be filled")
+	}
+	return nil
+}
+
+func (jc JWTConfig) Print () {
+	log.Info().Str("header", jc.Header).
+		Str("secret", strings.Repeat("*", len(jc.Secret))).Msg("Authorization")
 }
