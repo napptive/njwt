@@ -48,6 +48,7 @@ func (jc JWTConfig) IsValid () error {
 	return nil
 }
 
+// Print the configuration using the application logger.
 func (jc JWTConfig) Print () {
 	log.Info().Str("header", jc.Header).
 		Str("secret", strings.Repeat("*", len(jc.Secret))).Msg("Authorization")
