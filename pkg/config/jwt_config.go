@@ -43,7 +43,7 @@ func (jc JWTConfig) IsValid () error {
 		return nerrors.NewInvalidArgumentError("secret must be filled")
 	}
 	if jc.Header == "" {
-		return nerrors.NewInvalidArgumentError("header mus be filled")
+		return nerrors.NewInvalidArgumentError("header must be filled")
 	}
 	return nil
 }
