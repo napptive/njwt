@@ -18,8 +18,6 @@ package interceptors
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
@@ -49,14 +47,14 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 
 		authClaim, err := authorizeJWTToken(ctx, config)
 		if err != nil {
-			return nil, err
+			return nil, nerrors.FromError(err).ToGRPC()
 		}
 
 		// add the claim information to the context metadata
 		md := metadata.New(map[string]string{UserIdKey: authClaim.UserID, UsernameKey: authClaim.Username})
 		oldMD, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, fmt.Errorf("error recovering metadata")
+			return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
 		}
 		// adds the new metadata to the old one
 		fullMD := metadata.Join(oldMD, md)
@@ -71,18 +69,18 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.AuthxClaim, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, errors.New("retrieving metadata failed")
+		return nil, nerrors.NewInternalError("retrieving metadata failed")
 	}
 
 	token, ok := md[config.Header]
 	if !ok {
-		return nil, errors.New("no auth details supplied")
+		return nil, nerrors.NewInternalError("no auth details supplied")
 	}
 
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
 	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
-		return nil, fmt.Errorf("error recovering token [%s]", err.Error())
+		return nil, nerrors.NewInternalError("error recovering token [%s]", err.Error())
 	}
 
 	return &pc, nil
