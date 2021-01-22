@@ -18,6 +18,7 @@ package interceptors
 
 import (
 	"context"
+
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
@@ -26,9 +27,9 @@ import (
 )
 
 const (
-        // UserIdKey with the name of the key that will be injected in the context metadata corresponding to the user identifier.
-	UserIdKey   = "user_id"
-        // UsernameKey with the name of the key that will be injected in the context metadata corresponding to the username.
+	// UserIdKey with the name of the key that will be injected in the context metadata corresponding to the user identifier.
+	UserIDKey = "user_id"
+	// UsernameKey with the name of the key that will be injected in the context metadata corresponding to the username.
 	UsernameKey = "username"
 )
 
@@ -51,7 +52,7 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		}
 
 		// add the claim information to the context metadata
-		md := metadata.New(map[string]string{UserIdKey: authClaim.UserID, UsernameKey: authClaim.Username})
+		md := metadata.New(map[string]string{UserIDKey: authClaim.UserID, UsernameKey: authClaim.Username})
 		oldMD, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
 			return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
@@ -69,42 +70,42 @@ func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.AuthxClaim, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, nerrors.NewInternalError("retrieving metadata failed")
+		return nil, nerrors.NewUnauthenticatedError("retrieving metadata failed")
 	}
 
 	token, ok := md[config.Header]
 	if !ok {
-		return nil, nerrors.NewInternalError("no auth details supplied")
+		return nil, nerrors.NewUnauthenticatedError("no auth details supplied")
 	}
 
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
 	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
-		return nil, nerrors.NewInternalError("error recovering token [%s]", err.Error())
+		return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
 	}
 
 	return &pc, nil
 }
 
 // GetClaimFromContext gets user info from context
-func GetClaimFromContext (ctx context.Context) (*njwt.AuthxClaim, error) {
+func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 
 	// check that the user id and username are in the metadata
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, nerrors.NewInternalError("no metadata found")
+		return nil, nerrors.NewUnauthenticatedError("no metadata found")
 	}
-	userId, exists :=  md[UserIdKey]
-	if ! exists {
-		return nil, nerrors.NewInternalError("userId not found in metadata")
+	userID, exists := md[UserIDKey]
+	if !exists {
+		return nil, nerrors.NewUnauthenticatedError("userId not found in metadata")
 	}
-	username, exists :=  md[UsernameKey]
-	if ! exists {
-		return nil, nerrors.NewInternalError("username not found in metadata").ToGRPC()
+	username, exists := md[UsernameKey]
+	if !exists {
+		return nil, nerrors.NewUnauthenticatedError("username not found in metadata").ToGRPC()
 	}
 
 	return &njwt.AuthxClaim{
-		UserID:   userId[0],
+		UserID:   userID[0],
 		Username: username[0],
 	}, nil
 }
