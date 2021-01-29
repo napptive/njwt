@@ -35,12 +35,12 @@ const (
 
 // WithServerJWTInterceptor creates a gRPC interceptor that verifies the JWT received is valid
 func WithServerJWTInterceptor(config config.JWTConfig) grpc.ServerOption {
-	return grpc.UnaryInterceptor(jwtInterceptor(config))
+	return grpc.UnaryInterceptor(JwtInterceptor(config))
 
 }
 
-// jwtInterceptor verifies the JWT token and adds the claim information in the context
-func jwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
+// JwtInterceptor verifies the JWT token and adds the claim information in the context
+func JwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context,
 		req interface{},
 		info *grpc.UnaryServerInfo,
