@@ -126,19 +126,31 @@ docker-push: $(addsuffix .docker-push, $(BUILD_TARGETS))
 
 .PHONY: k8s
 k8s:
-	@rm -r $(K8S_FOLDER) || true
-	@mkdir -p $(K8S_FOLDER)
-	@cp deployments/*.yaml $(K8S_FOLDER)/.
-	@$(SED) -i 's/TARGET_K8S_NAMESPACE/$(TARGET_K8S_NAMESPACE)/' $(K8S_FOLDER)/*.yaml
-	@$(SED) -i 's/TARGET_DOCKER_REGISTRY/'$(TARGET_DOCKER_REGISTRY)'/' $(K8S_FOLDER)/*.yaml
-	@$(SED) -i 's/VERSION/$(VERSION)/' $(K8S_FOLDER)/*.yaml
-	@echo "Kubernetes files ready at $(K8S_FOLDER)/"
+	@if [ ! -d "deployments" ]; then \
+      	echo "Skipping k8s, no deployments found"; exit 0;\
+    else \
+    	@rm -r $(K8S_FOLDER) || true ; \
+    	@mkdir -p $(K8S_FOLDER); \
+    	@cp deployments/*.yaml $(K8S_FOLDER)/. ; \
+		@$(SED) -i 's/TARGET_K8S_NAMESPACE/$(TARGET_K8S_NAMESPACE)/' $(K8S_FOLDER)/*.yaml ;\
+		@$(SED) -i 's/TARGET_DOCKER_REGISTRY/'$(TARGET_DOCKER_REGISTRY)'/' $(K8S_FOLDER)/*.yaml ;\
+		@$(SED) -i 's/VERSION/$(VERSION)/' $(K8S_FOLDER)/*.yaml ;\
+		@echo "Kubernetes files ready at $(K8S_FOLDER)/"; \
+    fi
 
 .PHONY: release
 
 release: clean build-darwin build-linux k8s
-	@cp README.md $(BUILD_FOLDER) 
-	@tar -czvf $(BUILD_FOLDER)/$(PROJECT_NAME)_$(VERSION).tar.gz -C $(BUILD_FOLDER) bin k8s README.md
+	@mkdir -p $(BUILD_FOLDER)
+	@cp README.md $(BUILD_FOLDER)
+	@if [ -d "deployment" ]; then \
+  		tar -czvf $(BUILD_FOLDER)/$(PROJECT_NAME)_$(VERSION).tar.gz -C $(BUILD_FOLDER) bin k8s README.md; \
+  	elsif [-d "bin"] \
+  		tar -czvf $(BUILD_FOLDER)/$(PROJECT_NAME)_$(VERSION).tar.gz -C $(BUILD_FOLDER)  bin README.md; \
+  	else \
+		tar -czvf $(BUILD_FOLDER)/$(PROJECT_NAME)_$(VERSION).tar.gz -C $(BUILD_FOLDER)  README.md; \
+	fi
+
 	@echo "::set-output name=release_file::$(BUILD_FOLDER)/$(PROJECT_NAME)_$(VERSION).tar.gz"
 	@echo "::set-output name=release_name::$(PROJECT_NAME)_$(VERSION).tar.gz"
 	
