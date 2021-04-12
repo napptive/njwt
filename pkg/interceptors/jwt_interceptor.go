@@ -18,6 +18,7 @@ package interceptors
 
 import (
 	"context"
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
@@ -77,11 +78,24 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 	if !ok {
 		return nil, nerrors.NewUnauthenticatedError("no auth details supplied")
 	}
+	if token[0] == "" {
+		return nil, nerrors.NewNotFoundError("error getting token. Log in to the platform")
+	}
 
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
 	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
-		return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
+		castErr, ok := err.(*jwt.ValidationError)
+		if !ok {
+			return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
+		}
+		switch castErr.Errors {
+		case jwt.ValidationErrorExpired:
+			return nil, nerrors.NewUnauthenticatedError("[%s]. Please, log in to the platform again", err.Error())
+		default:
+			return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
+		}
+
 	}
 
 	return &pc, nil

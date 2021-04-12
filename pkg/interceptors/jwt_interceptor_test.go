@@ -105,6 +105,7 @@ var _ = ginkgo.Describe("JWT interceptor", func() {
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
 
 	})
+
 })
 
 const (
@@ -192,6 +193,24 @@ var _ = ginkgo.Context("Server interceptor", func() {
 
 		_, err = client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
+	})
+
+	ginkgo.It("should not be able to call to handler.Ping with an empty token", func() {
+
+		config := utils.GetJWTConfigTest()
+
+		token := ""
+
+		// Create a context with the token
+		ctx := utils.CreateOutgoingContext(config.Header, token)
+
+		_, err := client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
+		gomega.Expect(err).ShouldNot(gomega.Succeed())
+
+		nError := nerrors.FromGRPC(err)
+		gomega.Expect(nError).ShouldNot(gomega.Succeed())
+		gomega.Expect(nError.Code).Should(gomega.Equal(nerrors.NotFound))
+
 	})
 
 })
