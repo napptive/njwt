@@ -53,16 +53,10 @@ func JwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		}
 
 		// add the claim information to the context metadata
-		md := metadata.New(map[string]string{UserIDKey: authClaim.UserID, UsernameKey: authClaim.Username})
-		oldMD, ok := metadata.FromIncomingContext(ctx)
-		if !ok {
-			return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
+		newCtx, err := addClaimToContext(authClaim, ctx)
+		if err != nil {
+			return nil, err
 		}
-		// adds the new metadata to the old one
-		fullMD := metadata.Join(oldMD, md)
-		// and create new context with this one
-		newCtx := metadata.NewIncomingContext(ctx, fullMD)
-
 		return handler(newCtx, req)
 	}
 }
@@ -101,6 +95,22 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 	return &pc, nil
 }
 
+// addClaimToContext returns new Context joining the claim information
+func addClaimToContext (authClaim *njwt.AuthxClaim, ctx context.Context) (context.Context, error) {
+	// add the claim information to the context metadata
+	md := metadata.New(map[string]string{UserIDKey: authClaim.UserID, UsernameKey: authClaim.Username})
+	oldMD, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
+	}
+	// adds the new metadata to the old one
+	fullMD := metadata.Join(oldMD, md)
+	// and create new context with this one
+	newCtx := metadata.NewIncomingContext(ctx, fullMD)
+
+	return newCtx, nil
+}
+
 // GetClaimFromContext gets user info from context
 func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 
@@ -123,3 +133,35 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 		Username: username[0],
 	}, nil
 }
+
+
+func WithServerJWTStreamInterceptor(config config.JWTConfig) grpc.ServerOption {
+	return grpc.StreamInterceptor(JwtStreamInterceptor(config))
+
+}
+
+// JwtStreamInterceptor verifies the JWT token and adds the claim information in the context
+func JwtStreamInterceptor(config config.JWTConfig) grpc.StreamServerInterceptor {
+	return func(srv interface{},
+		stream grpc.ServerStream,
+		info *grpc.StreamServerInfo,
+		handler grpc.StreamHandler) error {
+
+		ctx := stream.Context()
+		authClaim, err := authorizeJWTToken(ctx, config)
+		if err != nil {
+			return  nerrors.FromError(err).ToGRPC()
+		}
+
+		// add the claim information to the context metadata
+		newCtx, err := addClaimToContext(authClaim, ctx)
+		if err != nil {
+			return err
+		}
+		// uses this new context in the stream wrapper
+		w := newStreamContextWrapper(stream)
+		w.SetContext(newCtx)
+		return handler(srv, w)
+	}
+}
+
