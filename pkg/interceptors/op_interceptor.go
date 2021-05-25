@@ -3,6 +3,7 @@ package interceptors
 import (
 	"github.com/napptive/analytics/pkg/analytics"
 	"github.com/napptive/analytics/pkg/entities"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"time"
 
@@ -27,11 +28,13 @@ func OpInterceptor(client analytics.Provider) grpc.UnaryServerInterceptor {
 		}
 
 		// Send the data to bigQuery
-		client.SendOperationData(entities.OperationData{
+		if err = client.SendOperationData(entities.OperationData{
 			Timestamp: time.Now(),
 			UserID:    userID,
 			Operation: info.FullMethod,
-		})
+		}); err != nil {
+			log.Err(err).Msg("error sending analytics data")
+		}
 
 		return handler(ctx, req)
 	}

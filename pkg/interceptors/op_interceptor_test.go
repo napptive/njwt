@@ -72,7 +72,7 @@ var _ = ginkgo.Context("Operation interceptor", func() {
 	})
 	ginkgo.AfterEach(func() {
 		// Flush data
-		provider.(*analytics.BigQueryProvider).SendLoginCache()
+		_ = provider.(*analytics.BigQueryProvider).SendLoginCache()
 		s.Stop()
 		lis.Close()
 	})
