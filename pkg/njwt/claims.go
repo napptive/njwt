@@ -17,6 +17,7 @@
 package njwt
 
 import (
+	"github.com/napptive/njwt/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"time"
 
@@ -45,19 +46,45 @@ func NewClaim(issuer string, expiration time.Duration, pc interface{}) *Claim {
 
 // AuthxClaim is the information stored by Authx in the claim.
 type AuthxClaim struct {
-	// UserID internal napptive user identificator.
-	UserID   string
+	// UserID internal napptive user identifier.
+	UserID string
 	// Username is the unique name of the user, currently the github account name.
-	Username string
+	Username         string
+	// AccountID with the actual account identifier
+	AccountID        string
+	// EnvironmentID with the actual environment identifier
+	EnvironmentID    string
+	// AccountAdmin with the admin account
+	AccountAdmin     string
+	// EnvironmentAdmin with the admin environment
+	EnvironmentAdmin string
+}
+
+func (ac *AuthxClaim) ToMap () map[string]string{
+	return map[string]string{utils.UserIDKey: ac.UserID, utils.UsernameKey: ac.Username,
+		utils.AccountIDKey: ac.AccountID, utils.EnvironmentIDKey: ac.EnvironmentID,
+		utils.AccountAdminKey: ac.AccountAdmin, utils.EnvironmentAdminKey: ac.EnvironmentAdmin,
+	}
 }
 
 // NewAuthxClaim creates a new instance of AuthxClaim.
-func NewAuthxClaim(userID string, username string) *AuthxClaim {
-	return &AuthxClaim{UserID: userID, Username: username}
+func NewAuthxClaim(userID string, username string, accountID string, environmentID string,
+	accountAdmin string, environmentAdmin string) *AuthxClaim {
+	return &AuthxClaim{
+		UserID:           userID,
+		Username:         username,
+		AccountID:        accountID,
+		EnvironmentID:    environmentID,
+		AccountAdmin:     accountAdmin,
+		EnvironmentAdmin: environmentAdmin,
+	}
 }
 
-func (a AuthxClaim) Print () {
-	log.Info().Str("userID", a.UserID).Str("username", a.Username).Msg("AuthxClaim")
+func (a AuthxClaim) Print() {
+	log.Info().Str("userID", a.UserID).Str("username", a.Username).
+		Str("AccountID", a.AccountID).Str("EnvironmentID", a.EnvironmentID).
+		Str("AccountAdmin", a.AccountAdmin).Str("EnvironmentAdmin", a.EnvironmentAdmin).
+		Msg("AuthxClaim")
 }
 
 // RefreshClaim is the information stored to create the refresh token.
