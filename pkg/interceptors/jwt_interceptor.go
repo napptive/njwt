@@ -19,8 +19,6 @@ package interceptors
 import (
 	"context"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/napptive/njwt/pkg/utils"
-
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
@@ -113,33 +111,33 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 	if !ok {
 		return nil, nerrors.NewUnauthenticatedError("no metadata found")
 	}
-	userID, exists := md[utils.UserIDKey]
+	userID, exists := md[config.UserIDKey]
 	if !exists {
 		return nil, nerrors.NewUnauthenticatedError("userId not found in metadata")
 	}
-	username, exists := md[utils.UsernameKey]
+	username, exists := md[config.UsernameKey]
 	if !exists {
 		return nil, nerrors.NewUnauthenticatedError("username not found in metadata").ToGRPC()
 	}
 
 	// TODO: Launch an error if not exists
 	accountIDVal := ""
-	accountID, exists := md[utils.AccountIDKey]
+	accountID, exists := md[config.AccountIDKey]
 	if exists {
 		accountIDVal = accountID[0]
 	}
 	envIDVal := ""
-	envID, exists := md[utils.EnvironmentIDKey]
+	envID, exists := md[config.EnvironmentIDKey]
 	if exists {
 		envIDVal = envID[0]
 	}
 	accountAdminVal := ""
-	accountAdmin, exists := md[utils.AccountAdminKey]
+	accountAdmin, exists := md[config.AccountAdminKey]
 	if exists {
 		accountAdminVal = accountAdmin[0]
 	}
 	envAdminVal := ""
-	envAdmin, exists := md[utils.EnvironmentAdminKey]
+	envAdmin, exists := md[config.EnvironmentAdminKey]
 	if exists {
 		envAdminVal = envAdmin[0]
 	}

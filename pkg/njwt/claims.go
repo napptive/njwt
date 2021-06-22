@@ -17,7 +17,7 @@
 package njwt
 
 import (
-	"github.com/napptive/njwt/pkg/utils"
+	"github.com/napptive/njwt/pkg/config"
 	"github.com/rs/zerolog/log"
 	"time"
 
@@ -61,9 +61,9 @@ type AuthxClaim struct {
 }
 
 func (ac *AuthxClaim) ToMap () map[string]string{
-	return map[string]string{utils.UserIDKey: ac.UserID, utils.UsernameKey: ac.Username,
-		utils.AccountIDKey: ac.AccountID, utils.EnvironmentIDKey: ac.EnvironmentID,
-		utils.AccountAdminKey: ac.AccountAdmin, utils.EnvironmentAdminKey: ac.EnvironmentAdmin,
+	return map[string]string{config.UserIDKey: ac.UserID, config.UsernameKey: ac.Username,
+		config.AccountIDKey: ac.AccountID, config.EnvironmentIDKey: ac.EnvironmentID,
+		config.AccountAdminKey: ac.AccountAdmin, config.EnvironmentAdminKey: ac.EnvironmentAdmin,
 	}
 }
 
