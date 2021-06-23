@@ -19,6 +19,7 @@ package njwt
 import (
 	"github.com/napptive/njwt/pkg/helper"
 	"github.com/rs/zerolog/log"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -55,21 +56,21 @@ type AuthxClaim struct {
 	// EnvironmentID with the actual environment identifier
 	EnvironmentID    string
 	// AccountAdmin with the admin account
-	AccountAdmin     string
+	AccountAdmin     bool
 	// EnvironmentAdmin with the admin environment
-	EnvironmentAdmin string
+	EnvironmentAdmin bool
 }
 
 func (ac *AuthxClaim) ToMap () map[string]string{
 	return map[string]string{helper.UserIDKey: ac.UserID, helper.UsernameKey: ac.Username,
 		helper.AccountIDKey: ac.AccountID, helper.EnvironmentIDKey: ac.EnvironmentID,
-		helper.AccountAdminKey: ac.AccountAdmin, helper.EnvironmentAdminKey: ac.EnvironmentAdmin,
+		helper.AccountAdminKey: strconv.FormatBool(ac.AccountAdmin), helper.EnvironmentAdminKey: strconv.FormatBool(ac.EnvironmentAdmin),
 	}
 }
 
 // NewAuthxClaim creates a new instance of AuthxClaim.
 func NewAuthxClaim(userID string, username string, accountID string, environmentID string,
-	accountAdmin string, environmentAdmin string) *AuthxClaim {
+	accountAdmin bool, environmentAdmin bool) *AuthxClaim {
 	return &AuthxClaim{
 		UserID:           userID,
 		Username:         username,
@@ -83,7 +84,7 @@ func NewAuthxClaim(userID string, username string, accountID string, environment
 func (a AuthxClaim) Print() {
 	log.Info().Str("userID", a.UserID).Str("username", a.Username).
 		Str("AccountID", a.AccountID).Str("EnvironmentID", a.EnvironmentID).
-		Str("AccountAdmin", a.AccountAdmin).Str("EnvironmentAdmin", a.EnvironmentAdmin).
+		Bool("AccountAdmin", a.AccountAdmin).Bool("EnvironmentAdmin", a.EnvironmentAdmin).
 		Msg("AuthxClaim")
 }
 
