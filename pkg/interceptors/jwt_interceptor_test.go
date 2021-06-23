@@ -18,6 +18,7 @@ package interceptors
 import (
 	"context"
 	"fmt"
+	"github.com/napptive/njwt/pkg/helper"
 	"net"
 	"time"
 
@@ -46,11 +47,11 @@ func (p pingHandler) Ping(ctx context.Context, request *grpc_ping_go.PingRequest
 	if !ok {
 		return nil, nerrors.NewInternalError("no metadata found").ToGRPC()
 	}
-	_, exists := md[UserIDKey]
+	_, exists := md[helper.UserIDKey]
 	if !exists {
 		return nil, nerrors.NewInternalError("userId not found in metadata").ToGRPC()
 	}
-	_, exists = md[UsernameKey]
+	_, exists = md[helper.UsernameKey]
 	if !exists {
 		return nil, nerrors.NewInternalError("username not found in metadata").ToGRPC()
 	}
