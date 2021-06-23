@@ -54,7 +54,8 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 		})
 
 		ginkgo.It("The recover claim with personal claim", func() {
-			pc := NewAuthxClaim("userID", "username", mockups.GetUserId(), mockups.GetUserId(), mockups.GetUserName(), mockups.GetUserName())
+			pc := NewAuthxClaim("userID", "username", mockups.GetUserId(), mockups.GetUserId(),
+				true, true)
 			claim := NewClaim("tt", time.Hour, pc)
 
 			secret := "secret"
