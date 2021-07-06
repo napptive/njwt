@@ -22,6 +22,8 @@ const (
 	UsernameKey         = "username"
 	// AccountIDKey with the name of the key that will be injected in the context metadata corresponding to the actual account identifier.
 	AccountIDKey        = "account_id"
+	// AccountNameKey with the name of the key that will be injected in the context metadata corresponding to the actual account name.
+	AccountNameKey = "account_name"
 	// EnvironmentIDKey with the name of the key that will be injected in the context metadata corresponding to the actual environment identifier.
 	EnvironmentIDKey    = "environment_id"
 	// AccountAdminKey with the name of the key that will be injected in the context metadata corresponding to the admin account identifier.
