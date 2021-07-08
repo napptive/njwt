@@ -28,6 +28,4 @@ const (
 	EnvironmentIDKey    = "environment_id"
 	// AccountAdminKey with the name of the key that will be injected in the context metadata corresponding to the admin account identifier.
 	AccountAdminKey     = "account_admin"
-	// EnvironmentAdminKey with the name of the key that will be injected in the context metadata corresponding to the admin environment identifier.
-	EnvironmentAdminKey = "environment_admin"
 )

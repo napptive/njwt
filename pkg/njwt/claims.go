@@ -59,8 +59,6 @@ type AuthxClaim struct {
 	EnvironmentID string
 	// AccountAdmin with the admin account
 	AccountAdmin bool
-	// EnvironmentAdmin with the admin environment
-	EnvironmentAdmin bool
 }
 
 func (ac *AuthxClaim) ToMap() map[string]string {
@@ -71,13 +69,12 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 		helper.AccountIDKey:        ac.AccountID,
 		helper.EnvironmentIDKey:    ac.EnvironmentID,
 		helper.AccountAdminKey:     strconv.FormatBool(ac.AccountAdmin),
-		helper.EnvironmentAdminKey: strconv.FormatBool(ac.EnvironmentAdmin),
 	}
 }
 
 // NewAuthxClaim creates a new instance of AuthxClaim.
 func NewAuthxClaim(userID string, username string, accountID string, accountName string,
-	environmentID string, accountAdmin bool, environmentAdmin bool) *AuthxClaim {
+	environmentID string, accountAdmin bool) *AuthxClaim {
 	return &AuthxClaim{
 		UserID:           userID,
 		Username:         username,
@@ -85,15 +82,13 @@ func NewAuthxClaim(userID string, username string, accountID string, accountName
 		AccountName:      accountName,
 		EnvironmentID:    environmentID,
 		AccountAdmin:     accountAdmin,
-		EnvironmentAdmin: environmentAdmin,
 	}
 }
 
 func (ac AuthxClaim) Print() {
 	log.Info().Str("userID", ac.UserID).Str("username", ac.Username).
 		Str("AccountID", ac.AccountID).Str("accountName", ac.AccountName).
-		Str("EnvironmentID", ac.EnvironmentID).Bool("AccountAdmin", ac.AccountAdmin).
-		Bool("EnvironmentAdmin", ac.EnvironmentAdmin).Msg("AuthxClaim")
+		Str("EnvironmentID", ac.EnvironmentID).Bool("AccountAdmin", ac.AccountAdmin).Msg("AuthxClaim")
 }
 
 // RefreshClaim is the information stored to create the refresh token.

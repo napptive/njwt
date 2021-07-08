@@ -28,7 +28,7 @@ import (
 func GetAuthxClaimTest () *njwt.AuthxClaim {
 	return njwt.NewAuthxClaim(mockups.GetUserId(), mockups.GetUserName(),
 		mockups.GetAccountId(), mockups.GetUserName(),
-		mockups.GetEnvironmentId(), false, true)
+		mockups.GetEnvironmentId(), false)
 }
 
 func GetJWTConfigTest () config.JWTConfig {
