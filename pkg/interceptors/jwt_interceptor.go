@@ -142,11 +142,6 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 	if exists && accountAdmin[0] == "true" {
 		accountAdminVal = true
 	}
-	envAdminVal := false
-	envAdmin, exists := md[helper.EnvironmentAdminKey]
-	if exists && envAdmin[0] == "true" {
-		envAdminVal = true
-	}
 	return &njwt.AuthxClaim{
 		UserID:           userID[0],
 		Username:         username[0],
@@ -154,7 +149,6 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 		AccountName:      accountNameVal,
 		EnvironmentID:    envIDVal,
 		AccountAdmin:     accountAdminVal,
-		EnvironmentAdmin: envAdminVal,
 	}, nil
 }
 
