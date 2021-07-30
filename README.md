@@ -29,8 +29,6 @@ s = grpc.NewServer(interceptor.WithServerJWTInterceptor(config))
 ```
 ## Badges
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/81607aa743e2644b935d/maintainability)](https://codeclimate.com/repos/5fd7b06e61ed8150ec009a16/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/81607aa743e2644b935d/test_coverage)](https://codeclimate.com/repos/5fd7b06e61ed8150ec009a16/test_coverage)
-
 ![Check changes in the Main branch](https://github.com/napptive/njwt/workflows/Check%20changes%20in%20the%20Main%20branch/badge.svg)
 
 ## License
