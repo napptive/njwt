@@ -19,13 +19,19 @@ const (
 	// UserIdKey with the name of the key that will be injected in the context metadata corresponding to the user identifier.
 	UserIDKey = "user_id"
 	// UsernameKey with the name of the key that will be injected in the context metadata corresponding to the username.
-	UsernameKey         = "username"
+	UsernameKey = "username"
 	// AccountIDKey with the name of the key that will be injected in the context metadata corresponding to the actual account identifier.
-	AccountIDKey        = "account_id"
+	AccountIDKey = "account_id"
 	// AccountNameKey with the name of the key that will be injected in the context metadata corresponding to the actual account name.
 	AccountNameKey = "account_name"
 	// EnvironmentIDKey with the name of the key that will be injected in the context metadata corresponding to the actual environment identifier.
-	EnvironmentIDKey    = "environment_id"
+	EnvironmentIDKey = "environment_id"
 	// AccountAdminKey with the name of the key that will be injected in the context metadata corresponding to the admin account identifier.
-	AccountAdminKey     = "account_admin"
+	AccountAdminKey = "account_admin"
+	// IDKey with a common identifier key.
+	IDKey = "id"
+	// OriginalUsernameKey with the key that will be injected in the context metadata for signup claims corresponding with the orignal username in the target provider
+	OriginalUsernameKey = "original_username"
+	// IdentityProviderKey with the key that will be injected in the context metadata for signup claims corresponding with the the target provider
+	IdentityProviderKey = "identity_provider"
 )
