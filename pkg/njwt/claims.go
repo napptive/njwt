@@ -17,10 +17,11 @@
 package njwt
 
 import (
-	"github.com/napptive/njwt/pkg/helper"
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"time"
+
+	"github.com/napptive/njwt/pkg/helper"
+	"github.com/rs/zerolog/log"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -63,12 +64,12 @@ type AuthxClaim struct {
 
 func (ac *AuthxClaim) ToMap() map[string]string {
 	return map[string]string{
-		helper.UserIDKey:           ac.UserID,
-		helper.UsernameKey:         ac.Username,
-		helper.AccountNameKey:      ac.AccountName,
-		helper.AccountIDKey:        ac.AccountID,
-		helper.EnvironmentIDKey:    ac.EnvironmentID,
-		helper.AccountAdminKey:     strconv.FormatBool(ac.AccountAdmin),
+		helper.UserIDKey:        ac.UserID,
+		helper.UsernameKey:      ac.Username,
+		helper.AccountNameKey:   ac.AccountName,
+		helper.AccountIDKey:     ac.AccountID,
+		helper.EnvironmentIDKey: ac.EnvironmentID,
+		helper.AccountAdminKey:  strconv.FormatBool(ac.AccountAdmin),
 	}
 }
 
@@ -76,12 +77,12 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 func NewAuthxClaim(userID string, username string, accountID string, accountName string,
 	environmentID string, accountAdmin bool) *AuthxClaim {
 	return &AuthxClaim{
-		UserID:           userID,
-		Username:         username,
-		AccountID:        accountID,
-		AccountName:      accountName,
-		EnvironmentID:    environmentID,
-		AccountAdmin:     accountAdmin,
+		UserID:        userID,
+		Username:      username,
+		AccountID:     accountID,
+		AccountName:   accountName,
+		EnvironmentID: environmentID,
+		AccountAdmin:  accountAdmin,
 	}
 }
 
@@ -101,4 +102,32 @@ type RefreshClaim struct {
 // NewRefreshClaim create a new instace of RefreshClaim
 func NewRefreshClaim(userID string, tokenID string) *RefreshClaim {
 	return &RefreshClaim{UserID: userID, TokenID: tokenID}
+}
+
+// SignupClaim with information related to the signup process.
+type SignupClaim struct {
+	// ID with an internal identifier. This value can be used to retrieve data from the cache.
+	ID string
+	// OriginalUsername with the username in the target provider.
+	OriginalUsername string
+	// IdentityProvider with the credential provider with which the user logged into the platform
+	IdentityProvider string
+}
+
+// NewSignupClaim builds a new claim for the signup process.
+func NewSignupClaim(ID string, originalUsername string, identityProvider string) *SignupClaim {
+	return &SignupClaim{
+		ID:               ID,
+		OriginalUsername: originalUsername,
+		IdentityProvider: identityProvider,
+	}
+}
+
+// ToMap transforms the signup claim into a map
+func (sc *SignupClaim) ToMap() map[string]string {
+	return map[string]string{
+		helper.UserIDKey:      sc.ID,
+		helper.UsernameKey:    sc.OriginalUsername,
+		helper.AccountNameKey: sc.IdentityProvider,
+	}
 }
