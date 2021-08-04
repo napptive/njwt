@@ -52,7 +52,7 @@ func IsTokenExpired(rawToken string, margin ...time.Duration) (*bool, error) {
 		effectiveExpirationTime = effectiveExpirationTime.Add(-DefaultExpirationMargin)
 	}
 
-	log.Info().Str("claimExpireTime", claimExpireTime.String()).Str("effectiveExpirationTime", effectiveExpirationTime.String()).Msg("claims")
+	log.Debug().Str("claimExpireTime", claimExpireTime.String()).Str("effectiveExpirationTime", effectiveExpirationTime.String()).Msg("claims")
 
 	result := time.Now().Unix() >= effectiveExpirationTime.Unix()
 	return &result, nil
