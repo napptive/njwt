@@ -3,7 +3,7 @@ module github.com/napptive/njwt
 go 1.15
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/napptive/grpc-ping-go v0.1.0
 	github.com/napptive/mockup-generator v1.0.1-0.20210630142914-ae5eac8f9f80
 	github.com/napptive/nerrors v1.0.0
