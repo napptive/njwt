@@ -23,7 +23,7 @@ import (
 	"github.com/napptive/njwt/pkg/helper"
 	"github.com/rs/zerolog/log"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 //Claim is the basic standard Claim
