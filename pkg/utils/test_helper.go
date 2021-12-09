@@ -17,37 +17,28 @@
 package utils
 
 import (
-	"github.com/napptive/mockup-generator/pkg/mockups"
-	"github.com/napptive/njwt/pkg/config"
-	"github.com/napptive/njwt/pkg/njwt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc/metadata"
-	"time"
+	"github.com/rs/xid"
+	"syreclabs.com/go/faker"
 )
 
-func GetAuthxClaimTest () *njwt.AuthxClaim {
-	return njwt.NewAuthxClaim(mockups.GetUserId(), mockups.GetUserName(),
-		mockups.GetAccountId(), mockups.GetUserName(),
-		mockups.GetEnvironmentId(), false)
+
+
+// GetTestUserId returns a random UserId
+func GetTestUserId() string {
+	return xid.New().String()
 }
 
-func GetJWTConfigTest () config.JWTConfig {
-	return config.JWTConfig{
-		Secret: "mysecret",
-		Header: "authorization",
-	}
+// GetTestAccountId returns a random AccountId
+func GetTestAccountId() string {
+	return xid.New().String()
 }
 
-func CreateIncomingContext (header string, token string) context.Context {
-	md := metadata.New(map[string]string{header: token})
-
-	parentCtx, _ := context.WithTimeout(context.TODO(), time.Minute)
-	return metadata.NewIncomingContext(parentCtx, md)
+// GetTestEnvironmentId returns a random EnvironmentId
+func GetTestEnvironmentId() string {
+	return xid.New().String()
 }
 
-func CreateOutgoingContext (header string, token string) context.Context {
-	md := metadata.New(map[string]string{header: token, "Prueba": "prueba"})
-
-	parentCtx, _ := context.WithTimeout(context.TODO(), time.Minute)
-	return metadata.NewOutgoingContext(parentCtx, md)
+// GetTestUserName returns a random Username
+func GetTestUserName() string {
+	return faker.Internet().UserName()
 }

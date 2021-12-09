@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/napptive/grpc-ping-go"
-	"github.com/napptive/mockup-generator/pkg/mockups"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
@@ -70,19 +69,21 @@ func (p pingHandler) Ping(ctx context.Context, request *grpc_ping_go.PingRequest
 	}, nil
 }
 
+
 // JWT authorize test
 var _ = ginkgo.Describe("JWT interceptor", func() {
 	ginkgo.It("check JWT Token is enabled", func() {
-		authClaim := utils.GetAuthxClaimTest()
-		claim := njwt.NewClaim(mockups.GetUserId(), time.Duration(1)*time.Hour, &authClaim)
-		config := utils.GetJWTConfigTest()
+		authClaim := GetTestAuthxClaim()
+		claim := njwt.NewClaim(utils.GetTestUserId(), time.Duration(1)*time.Hour, &authClaim)
+		config := GetTestJWTConfig()
 
 		token, err := njwt.New().Generate(claim, config.Secret)
 		gomega.Expect(err).Should(gomega.Succeed())
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := utils.CreateIncomingContext(config.Header, *token)
+		ctx, cancel := CreateTestIncomingContext(config.Header, *token)
+		defer cancel()
 
 		recovered, err := authorizeJWTToken(ctx, config)
 		gomega.Expect(err).Should(gomega.Succeed())
@@ -92,16 +93,17 @@ var _ = ginkgo.Describe("JWT interceptor", func() {
 	})
 
 	ginkgo.It("check JWT Token is disabled", func() {
-		authClaim := utils.GetAuthxClaimTest()
-		claim := njwt.NewClaim(mockups.GetUserId(), time.Duration(1)*time.Hour*(-1), &authClaim)
-		config := utils.GetJWTConfigTest()
+		authClaim := GetTestAuthxClaim()
+		claim := njwt.NewClaim(utils.GetTestUserId(), time.Duration(1)*time.Hour*(-1), &authClaim)
+		config := GetTestJWTConfig()
 
 		token, err := njwt.New().Generate(claim, config.Secret)
 		gomega.Expect(err).Should(gomega.Succeed())
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := utils.CreateIncomingContext(config.Header, *token)
+		ctx, cancel := CreateTestIncomingContext(config.Header, *token)
+		defer cancel()
 		_, err = authorizeJWTToken(ctx, config)
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
 
@@ -125,7 +127,7 @@ var _ = ginkgo.Context("Server interceptor", func() {
 
 	ginkgo.BeforeSuite(func() {
 		lis = bufconn.Listen(bufSize)
-		config = utils.GetJWTConfigTest()
+		config = GetTestJWTConfig()
 		s = grpc.NewServer(WithServerJWTInterceptor(config))
 
 		handler := pingHandler{}
@@ -159,9 +161,9 @@ var _ = ginkgo.Context("Server interceptor", func() {
 
 	ginkgo.It("should be able to call to handler.Ping with a valid token", func() {
 
-		authClaim := utils.GetAuthxClaimTest()
-		claim := njwt.NewClaim(mockups.GetUserId(), time.Duration(1)*time.Hour, &authClaim)
-		config := utils.GetJWTConfigTest()
+		authClaim := GetTestAuthxClaim()
+		claim := njwt.NewClaim(utils.GetTestUserId(), time.Duration(1)*time.Hour, &authClaim)
+		config := GetTestJWTConfig()
 
 		manager := njwt.New()
 		token, err := manager.Generate(claim, config.Secret)
@@ -169,7 +171,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := utils.CreateOutgoingContext(config.Header, *token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, *token)
+		defer cancel()
 		request := grpc_ping_go.PingRequest{RequestNumber: 1}
 		response, err := client.Ping(ctx, &request)
 		gomega.Expect(err).Should(gomega.Succeed())
@@ -180,9 +183,9 @@ var _ = ginkgo.Context("Server interceptor", func() {
 
 	ginkgo.It("should not be able to call to handler.Ping with a invalid token", func() {
 
-		authClaim := utils.GetAuthxClaimTest()
-		claim := njwt.NewClaim(mockups.GetUserId(), time.Minute*(-1), &authClaim)
-		config := utils.GetJWTConfigTest()
+		authClaim := GetTestAuthxClaim()
+		claim := njwt.NewClaim(utils.GetTestUserId(), time.Minute*(-1), &authClaim)
+		config := GetTestJWTConfig()
 
 		manager := njwt.New()
 		token, err := manager.Generate(claim, config.Secret)
@@ -190,7 +193,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := utils.CreateOutgoingContext(config.Header, *token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, *token)
+		defer cancel()
 
 		_, err = client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
@@ -198,12 +202,13 @@ var _ = ginkgo.Context("Server interceptor", func() {
 
 	ginkgo.It("should not be able to call to handler.Ping with an empty token", func() {
 
-		config := utils.GetJWTConfigTest()
+		config := GetTestJWTConfig()
 
 		token := ""
 
 		// Create a context with the token
-		ctx := utils.CreateOutgoingContext(config.Header, token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, token)
+		defer cancel()
 
 		_, err := client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
