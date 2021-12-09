@@ -17,7 +17,7 @@
 package njwt
 
 import (
-	"github.com/napptive/mockup-generator/pkg/mockups"
+	"github.com/napptive/njwt/pkg/utils"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -54,8 +54,8 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 		})
 
 		ginkgo.It("The recover claim with personal claim", func() {
-			pc := NewAuthxClaim("userID", "username", mockups.GetAccountId(), mockups.GetUserName(),
-				mockups.GetEnvironmentId(),true)
+			pc := NewAuthxClaim("userID", "username", utils.GetTestAccountId(), utils.GetTestUserName(),
+				utils.GetTestEnvironmentId(),true)
 			claim := NewClaim("tt", time.Hour, pc)
 
 			secret := "secret"
