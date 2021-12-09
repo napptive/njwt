@@ -24,16 +24,16 @@ func GetTestAuthxClaim () *njwt.AuthxClaim {
 		utils.GetTestEnvironmentId(), false)
 }
 
-func CreateTestIncomingContext(header string, token string) context.Context {
+func CreateTestIncomingContext(header string, token string) (context.Context, context.CancelFunc) {
 	md := metadata.New(map[string]string{header: token})
 
-	parentCtx, _ := context.WithTimeout(context.TODO(), time.Minute)
-	return metadata.NewIncomingContext(parentCtx, md)
+	parentCtx, cancel := context.WithTimeout(context.TODO(), time.Minute)
+	return metadata.NewIncomingContext(parentCtx, md), cancel
 }
 
-func CreateTestOutgoingContext(header string, token string) context.Context {
+func CreateTestOutgoingContext(header string, token string) (context.Context, context.CancelFunc) {
 	md := metadata.New(map[string]string{header: token, "Test": "test"})
 
-	parentCtx, _ := context.WithTimeout(context.TODO(), time.Minute)
-	return metadata.NewOutgoingContext(parentCtx, md)
+	parentCtx, cancel := context.WithTimeout(context.TODO(), time.Minute)
+	return metadata.NewOutgoingContext(parentCtx, md), cancel
 }

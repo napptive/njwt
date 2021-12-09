@@ -82,7 +82,8 @@ var _ = ginkgo.Describe("JWT interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := CreateTestIncomingContext(config.Header, *token)
+		ctx, cancel := CreateTestIncomingContext(config.Header, *token)
+		defer cancel()
 
 		recovered, err := authorizeJWTToken(ctx, config)
 		gomega.Expect(err).Should(gomega.Succeed())
@@ -101,7 +102,8 @@ var _ = ginkgo.Describe("JWT interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := CreateTestIncomingContext(config.Header, *token)
+		ctx, cancel := CreateTestIncomingContext(config.Header, *token)
+		defer cancel()
 		_, err = authorizeJWTToken(ctx, config)
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
 
@@ -169,7 +171,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := CreateTestOutgoingContext(config.Header, *token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, *token)
+		defer cancel()
 		request := grpc_ping_go.PingRequest{RequestNumber: 1}
 		response, err := client.Ping(ctx, &request)
 		gomega.Expect(err).Should(gomega.Succeed())
@@ -190,7 +193,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		gomega.Expect(token).ShouldNot(gomega.BeNil())
 
 		// Create a context with the token
-		ctx := CreateTestOutgoingContext(config.Header, *token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, *token)
+		defer cancel()
 
 		_, err = client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
@@ -203,7 +207,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		token := ""
 
 		// Create a context with the token
-		ctx := CreateTestOutgoingContext(config.Header, token)
+		ctx, cancel := CreateTestOutgoingContext(config.Header, token)
+		defer cancel()
 
 		_, err := client.Ping(ctx, &grpc_ping_go.PingRequest{RequestNumber: 1})
 		gomega.Expect(err).ShouldNot(gomega.Succeed())
