@@ -47,8 +47,8 @@ github.com/napptive/grpc-common-go v0.4.0 h1:uN6sxr8tidDEPwhVLA6UwnGpNHwuI+QTwWd
 github.com/napptive/grpc-common-go v0.4.0/go.mod h1:Q896cZY+yIkted9zYw3jtguVDdfL1bqTHjjiirBTjnw=
 github.com/napptive/grpc-ping-go v0.1.0 h1:/hNDGXAOPbGA/jszauggfDG3PcVsfpgrxrS5lLGgfwI=
 github.com/napptive/grpc-ping-go v0.1.0/go.mod h1:hBIdzClG9sZCHcq+tYZGNLaZ0TtQZ6s/YIRbNyhKES4=
-github.com/napptive/nerrors v1.0.0 h1:LADBxnAFPfsswumOVQC/17IUDJ2EXYsAYWEnXAmgv2o=
-github.com/napptive/nerrors v1.0.0/go.mod h1:ZZeFFcm34BFmU8yntdIEngwLbh2btshyPRg/J4fhY+0=
+github.com/napptive/nerrors v1.0.1 h1:G+CgLmJ65vSLpISq4A48uj+tgp/EN5o+FWQDGHwVvgo=
+github.com/napptive/nerrors v1.0.1/go.mod h1:ZZeFFcm34BFmU8yntdIEngwLbh2btshyPRg/J4fhY+0=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
