@@ -9,7 +9,7 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/napptive/grpc-common-go v0.4.0 // indirect
 	github.com/napptive/grpc-ping-go v0.1.0
-	github.com/napptive/nerrors v1.0.0
+	github.com/napptive/nerrors v1.0.1
 	github.com/onsi/ginkgo v1.15.0
 	github.com/onsi/gomega v1.10.5
 	github.com/rs/xid v1.2.1
