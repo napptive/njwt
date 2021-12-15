@@ -18,11 +18,12 @@ package interceptors
 import (
 	"context"
 	"fmt"
-	"github.com/napptive/njwt/pkg/helper"
 	"net"
 	"time"
 
-	"github.com/napptive/grpc-ping-go"
+	"github.com/napptive/njwt/pkg/helper"
+
+	grpc_ping_go "github.com/napptive/grpc-ping-go"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
@@ -31,6 +32,7 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/test/bufconn"
 )
@@ -68,7 +70,6 @@ func (p pingHandler) Ping(ctx context.Context, request *grpc_ping_go.PingRequest
 		Data:          fmt.Sprintf("Ping [%d] received", request.RequestNumber),
 	}, nil
 }
-
 
 // JWT authorize test
 var _ = ginkgo.Describe("JWT interceptor", func() {
@@ -142,7 +143,8 @@ var _ = ginkgo.Context("Server interceptor", func() {
 		conn, err := grpc.DialContext(context.Background(), "bufnet",
 			grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 				return lis.Dial()
-			}), grpc.WithInsecure())
+			}), grpc.WithTransportCredentials(insecure.NewCredentials()))
+
 		gomega.Expect(err).Should(gomega.Succeed())
 
 		client = grpc_ping_go.NewPingServiceClient(conn)
