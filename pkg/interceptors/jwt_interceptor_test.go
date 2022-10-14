@@ -88,8 +88,10 @@ var _ = ginkgo.Describe("JWT interceptor", func() {
 
 		recovered, err := authorizeJWTToken(ctx, config)
 		gomega.Expect(err).Should(gomega.Succeed())
-		gomega.Expect(recovered.UserID).Should(gomega.Equal(authClaim.UserID))
-		gomega.Expect(recovered.Username).Should(gomega.Equal(authClaim.Username))
+		gomega.Expect(recovered.GetAuthxClaim().UserID).Should(gomega.Equal(authClaim.UserID))
+		gomega.Expect(recovered.GetAuthxClaim().Username).Should(gomega.Equal(authClaim.Username))
+		gomega.Expect(recovered.Id).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(recovered.IssuedAt).ShouldNot(gomega.BeZero())
 
 	})
 
