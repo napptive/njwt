@@ -26,14 +26,14 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-//Claim is the basic standard Claim
+// Claim is the basic standard Claim
 type Claim struct {
 	jwt.StandardClaims
 	// PersonalClaim contains the related information with the Napptive platform.
 	PersonalClaim interface{} `json:"pc,omitempty"`
 }
 
-//NewClaim create a new Claim instance.
+// NewClaim create a new Claim instance.
 func NewClaim(issuer string, expiration time.Duration, pc interface{}) *Claim {
 	ct := time.Now()
 	standardClaim := jwt.StandardClaims{
@@ -90,6 +90,16 @@ func (ac AuthxClaim) Print() {
 	log.Info().Str("userID", ac.UserID).Str("username", ac.Username).
 		Str("AccountID", ac.AccountID).Str("accountName", ac.AccountName).
 		Str("EnvironmentID", ac.EnvironmentID).Bool("AccountAdmin", ac.AccountAdmin).Msg("AuthxClaim")
+}
+
+func (c *Claim) GetAuthxClaim() *AuthxClaim {
+	return c.PersonalClaim.(*AuthxClaim)
+}
+
+// ExtendedAuthxClaim combining the standard and authx claims.
+type ExtendedAuthxClaim struct {
+	jwt.StandardClaims
+	AuthxClaim
 }
 
 // RefreshClaim is the information stored to create the refresh token.

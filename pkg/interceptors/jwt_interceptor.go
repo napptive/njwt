@@ -18,6 +18,7 @@ package interceptors
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
@@ -25,6 +26,7 @@ import (
 	"github.com/napptive/njwt/pkg/njwt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"strconv"
 )
 
 // WithServerJWTInterceptor creates a gRPC interceptor that verifies the JWT received is valid
@@ -40,13 +42,13 @@ func JwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (interface{}, error) {
 
-		authClaim, err := authorizeJWTToken(ctx, config)
+		claim, err := authorizeJWTToken(ctx, config)
 		if err != nil {
 			return nil, nerrors.FromError(err).ToGRPC()
 		}
 
 		// add the claim information to the context metadata
-		newCtx, err := addClaimToContext(authClaim, ctx)
+		newCtx, err := addClaimToContext(claim, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -55,7 +57,7 @@ func JwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 }
 
 // authorizeJWTToken checks the token and returns the authxClaim
-func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.AuthxClaim, error) {
+func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Claim, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, nerrors.NewUnauthenticatedError("retrieving metadata failed")
@@ -71,7 +73,9 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 
 	// Check the token and get the authx claim
 	var pc njwt.AuthxClaim
-	if _, err := njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
+	var claim *njwt.Claim
+	var err error
+	if claim, err = njwt.New().Recover(token[0], config.Secret, &pc); err != nil {
 		castErr, ok := err.(*jwt.ValidationError)
 		if !ok {
 			return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
@@ -82,16 +86,18 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Auth
 		default:
 			return nil, nerrors.NewUnauthenticatedError("error recovering token [%s]", err.Error())
 		}
-
 	}
 
-	return &pc, nil
+	return claim, nil
 }
 
 // addClaimToContext returns new Context joining the claim information
-func addClaimToContext(authClaim *njwt.AuthxClaim, ctx context.Context) (context.Context, error) {
+func addClaimToContext(claim *njwt.Claim, ctx context.Context) (context.Context, error) {
 	// add the claim information to the context metadata
-	md := metadata.New(authClaim.ToMap())
+	authMap := claim.GetAuthxClaim().ToMap()
+	authMap[helper.JWTID] = claim.Id
+	authMap[helper.JWTIssuedAt] = fmt.Sprint(claim.IssuedAt)
+	md := metadata.New(authMap)
 	oldMD, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, nerrors.NewInternalError("error recovering metadata").ToGRPC()
@@ -105,7 +111,7 @@ func addClaimToContext(authClaim *njwt.AuthxClaim, ctx context.Context) (context
 }
 
 // GetClaimFromContext gets user info from context
-func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
+func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) {
 
 	// check that the user id and username are in the metadata
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -119,6 +125,14 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 	username, exists := md[helper.UsernameKey]
 	if !exists {
 		return nil, nerrors.NewUnauthenticatedError("username not found in metadata").ToGRPC()
+	}
+	tokenID, exists := md[helper.JWTID]
+	if !exists {
+		return nil, nerrors.NewUnauthenticatedError("tokenID not found in metadata").ToGRPC()
+	}
+	tokenIssuedAt, exists := md[helper.JWTIssuedAt]
+	if !exists {
+		return nil, nerrors.NewUnauthenticatedError("tokenIssuedAt not found in metadata").ToGRPC()
 	}
 
 	// TODO: Launch an error if not exists
@@ -142,19 +156,30 @@ func GetClaimFromContext(ctx context.Context) (*njwt.AuthxClaim, error) {
 	if exists && accountAdmin[0] == "true" {
 		accountAdminVal = true
 	}
-	return &njwt.AuthxClaim{
-		UserID:           userID[0],
-		Username:         username[0],
-		AccountID:        accountIDVal,
-		AccountName:      accountNameVal,
-		EnvironmentID:    envIDVal,
-		AccountAdmin:     accountAdminVal,
+
+	issuedAt, err := strconv.ParseInt(tokenIssuedAt[0], 10, 64)
+	if err != nil {
+		return nil, nerrors.NewUnauthenticatedError("invalid token information")
+	}
+
+	return &njwt.ExtendedAuthxClaim{
+		StandardClaims: jwt.StandardClaims{
+			Id:       tokenID[0],
+			IssuedAt: issuedAt,
+		},
+		AuthxClaim: njwt.AuthxClaim{
+			UserID:        userID[0],
+			Username:      username[0],
+			AccountID:     accountIDVal,
+			AccountName:   accountNameVal,
+			EnvironmentID: envIDVal,
+			AccountAdmin:  accountAdminVal,
+		},
 	}, nil
 }
 
 func WithServerJWTStreamInterceptor(config config.JWTConfig) grpc.ServerOption {
 	return grpc.StreamInterceptor(JwtStreamInterceptor(config))
-
 }
 
 // JwtStreamInterceptor verifies the JWT token and adds the claim information in the context

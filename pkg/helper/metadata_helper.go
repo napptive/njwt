@@ -16,6 +16,10 @@
 package helper
 
 const (
+	// JWTID with the identifier of the JWT token.
+	JWTID = "jwt_id"
+	// JWTIssuedAt with the time in which the token was created.
+	JWTIssuedAt = "jwt_issued_at"
 	// UserIdKey with the name of the key that will be injected in the context metadata corresponding to the user identifier.
 	UserIDKey = "user_id"
 	// UsernameKey with the name of the key that will be injected in the context metadata corresponding to the username.
