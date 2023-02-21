@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package interceptors
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
@@ -26,7 +28,6 @@ import (
 	"github.com/napptive/njwt/pkg/njwt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"strconv"
 )
 
 // WithServerJWTInterceptor creates a gRPC interceptor that verifies the JWT received is valid
@@ -134,6 +135,10 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 	if !exists {
 		return nil, nerrors.NewUnauthenticatedError("tokenIssuedAt not found in metadata").ToGRPC()
 	}
+	issuedAt, err := strconv.ParseInt(tokenIssuedAt[0], 10, 64)
+	if err != nil {
+		return nil, nerrors.NewUnauthenticatedError("invalid token information")
+	}
 
 	// TODO: Launch an error if not exists
 	accountIDVal := ""
@@ -157,9 +162,16 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 		accountAdminVal = true
 	}
 
-	issuedAt, err := strconv.ParseInt(tokenIssuedAt[0], 10, 64)
-	if err != nil {
-		return nil, nerrors.NewUnauthenticatedError("invalid token information")
+	zoneIDVal := ""
+	zoneID, exists := md[helper.ZoneIDKey]
+	if exists {
+		zoneIDVal = zoneID[0]
+	}
+
+	zoneURLVal := ""
+	zoneURL, exists := md[helper.ZoneURLKey]
+	if exists {
+		zoneURLVal = zoneURL[0]
 	}
 
 	return &njwt.ExtendedAuthxClaim{
@@ -174,6 +186,8 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 			AccountName:   accountNameVal,
 			EnvironmentID: envIDVal,
 			AccountAdmin:  accountAdminVal,
+			ZoneID:        zoneIDVal,
+			ZoneURL:       zoneURLVal,
 		},
 	}, nil
 }

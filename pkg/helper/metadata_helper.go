@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package helper
 
 const (
@@ -32,6 +33,10 @@ const (
 	EnvironmentIDKey = "environment_id"
 	// AccountAdminKey with the name of the key that will be injected in the context metadata corresponding to the admin account identifier.
 	AccountAdminKey = "account_admin"
+	// ZoneIDKey with the name of the key that will be injected in the context metadata corresponding to the zone identifier.
+	ZoneIDKey = "zone_id"
+	// ZoneURLKey with the name of the key that will be injected in the context metadata corresponding to the zone url.
+	ZoneURLKey = "zone_url"
 	// IDKey with a common identifier key.
 	IDKey = "id"
 	// OriginalUsernameKey with the key that will be injected in the context metadata for signup claims corresponding with the orignal username in the target provider
