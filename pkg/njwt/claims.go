@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/napptive/njwt/pkg/helper"
 	"github.com/rs/zerolog/log"
-
-	"github.com/golang-jwt/jwt"
 )
 
 // Claim is the basic standard Claim
@@ -60,8 +59,13 @@ type AuthxClaim struct {
 	EnvironmentID string
 	// AccountAdmin with the admin account
 	AccountAdmin bool
+	// ZoneID with the zone identifier
+	ZoneID string
+	// ZoneURL with the base URL of the current zone.
+	ZoneURL string
 }
 
+// ToMap transforms the claim into a key-value map.
 func (ac *AuthxClaim) ToMap() map[string]string {
 	return map[string]string{
 		helper.UserIDKey:        ac.UserID,
@@ -70,12 +74,16 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 		helper.AccountIDKey:     ac.AccountID,
 		helper.EnvironmentIDKey: ac.EnvironmentID,
 		helper.AccountAdminKey:  strconv.FormatBool(ac.AccountAdmin),
+		helper.ZoneIDKey:        ac.ZoneID,
+		helper.ZoneURLKey:       ac.ZoneURL,
 	}
 }
 
 // NewAuthxClaim creates a new instance of AuthxClaim.
-func NewAuthxClaim(userID string, username string, accountID string, accountName string,
-	environmentID string, accountAdmin bool) *AuthxClaim {
+func NewAuthxClaim(userID string, username string,
+	accountID string, accountName string,
+	environmentID string, accountAdmin bool,
+	zoneID string, zoneURL string) *AuthxClaim {
 	return &AuthxClaim{
 		UserID:        userID,
 		Username:      username,
@@ -83,15 +91,19 @@ func NewAuthxClaim(userID string, username string, accountID string, accountName
 		AccountName:   accountName,
 		EnvironmentID: environmentID,
 		AccountAdmin:  accountAdmin,
+		ZoneID:        zoneID,
+		ZoneURL:       zoneURL,
 	}
 }
 
-func (ac AuthxClaim) Print() {
-	log.Info().Str("userID", ac.UserID).Str("username", ac.Username).
-		Str("AccountID", ac.AccountID).Str("accountName", ac.AccountName).
-		Str("EnvironmentID", ac.EnvironmentID).Bool("AccountAdmin", ac.AccountAdmin).Msg("AuthxClaim")
+// Print the contents of the claim through the logger.
+func (ac *AuthxClaim) Print() {
+	log.Info().Str("user_id", ac.UserID).Str("username", ac.Username).
+		Str("account_id", ac.AccountID).Str("account_name", ac.AccountName).
+		Str("environment_id", ac.EnvironmentID).Bool("account_admin", ac.AccountAdmin).Str("zone_id", ac.ZoneID).Str("zone_url", ac.ZoneURL).Msg("AuthxClaim")
 }
 
+// GetAuthxClaim returns the AuthxClaim section of the claim.
 func (c *Claim) GetAuthxClaim() *AuthxClaim {
 	return c.PersonalClaim.(*AuthxClaim)
 }
@@ -109,7 +121,7 @@ type RefreshClaim struct {
 	TokenID string
 }
 
-// NewRefreshClaim create a new instace of RefreshClaim
+// NewRefreshClaim create a new instance of RefreshClaim
 func NewRefreshClaim(userID string, tokenID string) *RefreshClaim {
 	return &RefreshClaim{UserID: userID, TokenID: tokenID}
 }

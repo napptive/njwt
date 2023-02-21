@@ -55,7 +55,7 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 
 		ginkgo.It("The recover claim with personal claim", func() {
 			pc := NewAuthxClaim("userID", "username", utils.GetTestAccountId(), utils.GetTestUserName(),
-				utils.GetTestEnvironmentId(),true)
+				utils.GetTestEnvironmentId(), true, "zoneID", "zoneURL")
 			claim := NewClaim("tt", time.Hour, pc)
 
 			secret := "secret"
