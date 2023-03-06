@@ -112,6 +112,7 @@ func (izsm *InterceptorZoneSecretManager) GetZoneSecret(zoneID string) (*string,
 	ctx, cancel := context.WithTimeout(context.Background(), ClientTimeout)
 	defer cancel()
 
+	log.Debug().Str("zone_id", zoneID).Msg("loading zone signing secret from provider")
 	zoneSigningSecret, err := izsm.secretsClient.Get(ctx, &grpc_jwt_go.GetSecretRequest{SecretId: zoneID})
 	if err != nil {
 		log.Error().Err(err).Str("zone_id", zoneID).Msg("unable to retrieve zone signing secret")
