@@ -49,7 +49,7 @@ func JwtInterceptor(config config.JWTConfig) grpc.UnaryServerInterceptor {
 		}
 
 		// add the claim information to the context metadata
-		newCtx, err := addClaimToContext(claim, ctx)
+		newCtx, err := AddClaimToContext(claim, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -92,8 +92,8 @@ func authorizeJWTToken(ctx context.Context, config config.JWTConfig) (*njwt.Clai
 	return claim, nil
 }
 
-// addClaimToContext returns new Context joining the claim information
-func addClaimToContext(claim *njwt.Claim, ctx context.Context) (context.Context, error) {
+// AddClaimToContext returns new Context joining the claim information
+func AddClaimToContext(claim *njwt.Claim, ctx context.Context) (context.Context, error) {
 	// add the claim information to the context metadata
 	authMap := claim.GetAuthxClaim().ToMap()
 	authMap[helper.JWTID] = claim.Id
@@ -107,7 +107,6 @@ func addClaimToContext(claim *njwt.Claim, ctx context.Context) (context.Context,
 	fullMD := metadata.Join(oldMD, md)
 	// and create new context with this one
 	newCtx := metadata.NewIncomingContext(ctx, fullMD)
-
 	return newCtx, nil
 }
 
@@ -210,7 +209,7 @@ func JwtStreamInterceptor(config config.JWTConfig) grpc.StreamServerInterceptor 
 		}
 
 		// add the claim information to the context metadata
-		newCtx, err := addClaimToContext(authClaim, ctx)
+		newCtx, err := AddClaimToContext(authClaim, ctx)
 		if err != nil {
 			return err
 		}

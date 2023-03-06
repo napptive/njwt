@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+//go:generate mockgen -destination secret_provider_mock_test.go -package=interceptors github.com/napptive/njwt/pkg/interceptors SecretProvider
+//go:generate mockgen -destination secret_client_mock_test.go -package=interceptors github.com/napptive/grpc-jwt-go SecretsClient
+
 package interceptors
-
-import (
-	"testing"
-
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/gomega"
-)
-
-func TestInterceptors(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "Interceptors Suite")
-}
