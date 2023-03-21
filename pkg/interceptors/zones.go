@@ -19,12 +19,12 @@ package interceptors
 import (
 	"context"
 	"fmt"
-	"github.com/golang-jwt/jwt"
-	"github.com/rs/zerolog/log"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
 	"github.com/napptive/njwt/pkg/njwt"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -113,4 +113,35 @@ func authorizeZoneAwareJWTToken(ctx context.Context, config config.JWTConfig, se
 	}
 
 	return claim, nil
+}
+
+// WithZoneAwareJWTStreamInterceptor creates a gRPC stream interceptor that verifies if the JWT received is
+// // valid attending to the zone that issued it.
+func WithZoneAwareJWTStreamInterceptor(config config.JWTConfig, secretProvider SecretProvider) grpc.ServerOption {
+	return grpc.StreamInterceptor(ZoneAwareJWTStreamInterceptor(config, secretProvider))
+}
+
+// ZoneAwareJWTStreamInterceptor verifies the JWT token and adds the claim information in the context
+func ZoneAwareJWTStreamInterceptor(config config.JWTConfig, secretProvider SecretProvider) grpc.StreamServerInterceptor {
+	return func(srv interface{},
+		stream grpc.ServerStream,
+		info *grpc.StreamServerInfo,
+		handler grpc.StreamHandler) error {
+
+		ctx := stream.Context()
+		authClaim, err := authorizeZoneAwareJWTToken(ctx, config, secretProvider)
+		if err != nil {
+			return nerrors.FromError(err).ToGRPC()
+		}
+
+		// add the claim information to the context metadata
+		newCtx, err := AddClaimToContext(authClaim, ctx)
+		if err != nil {
+			return err
+		}
+		// uses this new context in the stream wrapper
+		w := newStreamContextWrapper(stream)
+		w.SetContext(newCtx)
+		return handler(srv, w)
+	}
 }

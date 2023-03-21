@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package interceptors
 
 import (
@@ -21,11 +22,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/napptive/njwt/pkg/helper"
-
 	grpc_ping_go "github.com/napptive/grpc-ping-go"
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/napptive/njwt/pkg/config"
+	"github.com/napptive/njwt/pkg/helper"
 	"github.com/napptive/njwt/pkg/njwt"
 	"github.com/napptive/njwt/pkg/utils"
 	"github.com/onsi/ginkgo"
