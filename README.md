@@ -1,9 +1,12 @@
 # NJWT
+
 JWT library for the Napptive projects
 
 The purpose of this project is to provide a simple JWT library to handle the authentication tokens of the Napptive platform.
 
 ## Usage
+
+To create new tokens:
 
 ```go
      pc := NewAuthxClaim("userID", "username")
@@ -15,9 +18,12 @@ The purpose of this project is to provide a simple JWT library to handle the aut
      recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
      recoveredPC, ok := recClaim.PersonalClaim.(*AuthxClaim)
 ```
+
 #### JWT Interceptor
-this interceptor validates a JWT token received
-```
+
+To create an interceptor that validates incoming gRPC calls with a JWT on an authorization header in the context:
+
+```go
 cfg := config.JWTConfig{
    Secret: "mysecret",
    Header: "authorization",
@@ -33,7 +39,7 @@ s = grpc.NewServer(interceptor.WithServerJWTInterceptor(config))
 
 ## License
 
- Copyright 2020 Napptive
+ Copyright 2023 Napptive
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
