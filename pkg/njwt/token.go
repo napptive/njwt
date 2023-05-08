@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package njwt
 
 import (
 	"fmt"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
 )
 
+// generateUUID generates a new UUID.
 func generateUUID() string {
 	return xid.New().String()
 }
@@ -31,9 +33,18 @@ func generateUUID() string {
 type TokenManager interface {
 	// Generate a new token with a claim.
 	Generate(claim *Claim, secret string) (*string, error)
-	// Recover the claim from a token, if you want to recover the personal claim yo must include the appropiated object.
-	// Example: recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
+	// Recover the claim from a token, if you want to recover the personal claim you must include the appropriate object.
+	// Example:
+	//   recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
 	Recover(tk string, secret string, pc interface{}) (*Claim, error)
+	// RecoverUnverified parses the token returning the parsed claim.
+	// NOTICE: This method does not verify the authenticity of the token as no secret is used to check it.
+	// This method is intended to be used by clients that need to check data from a token provided by the library
+	// without the capability of checking its validity.
+	// Example:
+	//   personalClaim := &AuthxClaim{}
+	//	 unverifiedClaim, err := tokenMgr.RecoverUnverified(*token, personalClaim)
+	RecoverUnverified(tk string, pc interface{}) (*Claim, error)
 }
 
 // New create a new instance of the token generator.
@@ -54,7 +65,8 @@ func (*manager) Generate(claim *Claim, secret string) (*string, error) {
 }
 
 // Recover the claim from a token, if you want to recover the personal claim yo must include the appropiated object.
-// Example: recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
+// Example:
+//   recoveredClaim, err := tokenMgr.Recover(*token, secret, &AuthxClaim{})
 func (*manager) Recover(tk string, secret string, pc interface{}) (*Claim, error) {
 	claim := &Claim{PersonalClaim: pc}
 	_, err := jwt.ParseWithClaims(tk, claim, func(token *jwt.Token) (interface{}, error) {
@@ -68,6 +80,22 @@ func (*manager) Recover(tk string, secret string, pc interface{}) (*Claim, error
 		return []byte(secret), nil
 	})
 
+	if err != nil {
+		return nil, err
+	}
+	return claim, nil
+}
+
+// RecoverUnverified parses the token returning the parsed claim.
+// NOTICE: This method does not verify the authenticity of the token as no secret is used to check it.
+// This method is intended to be used by clients that need to check data from a token provided by the library
+// without the capability of checking its validity.
+// Example:
+//   personalClaim := &AuthxClaim{}
+//	 unverifiedClaim, err := tokenMgr.RecoverUnverified(*token, personalClaim)
+func (*manager) RecoverUnverified(tk string, pc interface{}) (*Claim, error) {
+	claim := &Claim{PersonalClaim: pc}
+	_, _, err := new(jwt.Parser).ParseUnverified(tk, claim)
 	if err != nil {
 		return nil, err
 	}

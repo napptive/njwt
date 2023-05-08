@@ -91,4 +91,26 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 
 		})
 	})
+	ginkgo.Context("working with unverified tokens", func() {
+		tokenMgr := New()
+		ginkgo.It("should be able to retrieve raw information from a token", func() {
+			pc := NewAuthxClaim("userID", "username", utils.GetTestAccountId(), utils.GetTestUserName(),
+				utils.GetTestEnvironmentId(), true, "zoneID", "zoneURL")
+			claim := NewClaim("tt", time.Hour, pc)
+
+			secret := "secret"
+			token, err := tokenMgr.Generate(claim, secret)
+			gomega.Expect(err).To(gomega.Succeed())
+			gomega.Expect(token).NotTo(gomega.BeNil())
+
+			personalClaim := &AuthxClaim{}
+			unverifiedClaim, err := tokenMgr.RecoverUnverified(*token, personalClaim)
+			gomega.Expect(err).To(gomega.Succeed())
+			gomega.Expect(unverifiedClaim).ShouldNot(gomega.BeNil())
+			unverifiedAuthClaim := unverifiedClaim.GetAuthxClaim()
+			gomega.Expect(unverifiedAuthClaim).ShouldNot(gomega.BeNil())
+			gomega.Expect(unverifiedAuthClaim).Should(gomega.BeEquivalentTo(pc))
+		})
+
+	})
 })

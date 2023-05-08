@@ -1,6 +1,5 @@
-
 /**
- * Copyright 2020 Napptive
+ * Copyright 2023 Napptive
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +17,13 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/napptive/nerrors/pkg/nerrors"
 	"github.com/rs/zerolog/log"
-	"strings"
 )
 
-// JWT with the JWT configuration
+// JWTConfig with the JWT configuration
 type JWTConfig struct {
 	// Secret with the token secret, used to recover the token
 	Secret string
@@ -32,7 +32,7 @@ type JWTConfig struct {
 }
 
 // NewJWTConfig creates a config object with a given secret and header.
-func NewJWTConfig (secret string, header string) JWTConfig {
+func NewJWTConfig(secret string, header string) JWTConfig {
 	return JWTConfig{
 		Secret: secret,
 		Header: header,
@@ -40,7 +40,7 @@ func NewJWTConfig (secret string, header string) JWTConfig {
 }
 
 // IsValid checks if the configuration options are valid.
-func (jc JWTConfig) IsValid () error {
+func (jc JWTConfig) IsValid() error {
 	if jc.Secret == "" {
 		return nerrors.NewInvalidArgumentError("secret must be filled")
 	}
@@ -51,7 +51,7 @@ func (jc JWTConfig) IsValid () error {
 }
 
 // Print the configuration using the application logger.
-func (jc JWTConfig) Print () {
+func (jc JWTConfig) Print() {
 	log.Info().Str("header", jc.Header).
 		Str("secret", strings.Repeat("*", len(jc.Secret))).Msg("Authorization")
 }

@@ -114,6 +114,14 @@ type ExtendedAuthxClaim struct {
 	AuthxClaim
 }
 
+// ToClaim transforms an ExtendedAuthxClaim into a standard Claim.
+func (eac *ExtendedAuthxClaim) ToClaim() *Claim {
+	return &Claim{
+		StandardClaims: eac.StandardClaims,
+		PersonalClaim:  eac.AuthxClaim,
+	}
+}
+
 // RefreshClaim is the information stored to create the refresh token.
 type RefreshClaim struct {
 	UserID string
