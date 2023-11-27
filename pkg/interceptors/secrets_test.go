@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("Zone aware secrets manager", func() {
 
 	ginkgo.It("should be able to retrieve a zone secret", func() {
 		response := &grpc_jwt_go.SecretResponse{
-			JwtSecret: "zoneSecet",
+			JwtSecret: "zoneSecret",
 		}
 		secretsClientMock.EXPECT().Get(gomock.Any(), gomock.Any()).Return(response, nil)
 		secret, err := secretsManager.GetZoneSecret("uncached")

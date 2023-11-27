@@ -17,6 +17,7 @@
 package njwt
 
 import (
+	"encoding/json"
 	"strconv"
 	"time"
 
@@ -63,19 +64,58 @@ type AuthxClaim struct {
 	ZoneID string
 	// ZoneURL with the base URL of the current zone.
 	ZoneURL string
+	// EnvironmentAccount with the actual account identifier
+	EnvironmentAccount string
+	// Accounts with the information of the accounts to which a user belongs
+	Accounts []UserAccountClaim
+}
+
+type UserAccountClaim struct {
+	// Id with the account identifier
+	Id string
+	// Name with the account name
+	Name string
+	// Role with the user role in the account
+	Role string
+}
+
+func (ac *AuthxClaim) AccountsToString() (string, error) {
+	account, err := json.Marshal(ac.Accounts)
+	if err != nil {
+		return "", err
+	}
+	accountStr := string(account)
+	return accountStr, nil
+}
+
+func StringToAccounts(str string) ([]UserAccountClaim, error) {
+	var accounts []UserAccountClaim
+	err := json.Unmarshal([]byte(str), &accounts)
+	if err != nil {
+		// TODO: return an error
+		log.Error().Err(err).Msg("error converting string to authx claim")
+	}
+	return accounts, err
 }
 
 // ToMap transforms the claim into a key-value map.
 func (ac *AuthxClaim) ToMap() map[string]string {
+	accounts, err := ac.AccountsToString()
+	if err != nil {
+		// TODO: return an error
+		log.Error().Err(err).Msg("error converting authx claim to a map")
+	}
 	return map[string]string{
-		helper.UserIDKey:        ac.UserID,
-		helper.UsernameKey:      ac.Username,
-		helper.AccountNameKey:   ac.AccountName,
-		helper.AccountIDKey:     ac.AccountID,
-		helper.EnvironmentIDKey: ac.EnvironmentID,
-		helper.AccountAdminKey:  strconv.FormatBool(ac.AccountAdmin),
-		helper.ZoneIDKey:        ac.ZoneID,
-		helper.ZoneURLKey:       ac.ZoneURL,
+		helper.UserIDKey:             ac.UserID,
+		helper.UsernameKey:           ac.Username,
+		helper.AccountNameKey:        ac.AccountName,
+		helper.AccountIDKey:          ac.AccountID,
+		helper.EnvironmentIDKey:      ac.EnvironmentID,
+		helper.AccountAdminKey:       strconv.FormatBool(ac.AccountAdmin),
+		helper.ZoneIDKey:             ac.ZoneID,
+		helper.ZoneURLKey:            ac.ZoneURL,
+		helper.EnvironmentAccountKey: ac.EnvironmentAccount,
+		helper.AccountsKey:           accounts,
 	}
 }
 
@@ -83,16 +123,18 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 func NewAuthxClaim(userID string, username string,
 	accountID string, accountName string,
 	environmentID string, accountAdmin bool,
-	zoneID string, zoneURL string) *AuthxClaim {
+	zoneID string, zoneURL string, accounts []UserAccountClaim) *AuthxClaim {
 	return &AuthxClaim{
-		UserID:        userID,
-		Username:      username,
-		AccountID:     accountID,
-		AccountName:   accountName,
-		EnvironmentID: environmentID,
-		AccountAdmin:  accountAdmin,
-		ZoneID:        zoneID,
-		ZoneURL:       zoneURL,
+		UserID:             userID,
+		Username:           username,
+		AccountID:          accountID,
+		AccountName:        accountName,
+		EnvironmentID:      environmentID,
+		AccountAdmin:       accountAdmin,
+		ZoneID:             zoneID,
+		ZoneURL:            zoneURL,
+		EnvironmentAccount: accountID,
+		Accounts:           accounts,
 	}
 }
 

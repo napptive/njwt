@@ -19,9 +19,22 @@ func GetTestJWTConfig() config.JWTConfig {
 
 // GetTestAuthxClaim returns a random AuthxClaim to use in the tests
 func GetTestAuthxClaim() *njwt.AuthxClaim {
-	return njwt.NewAuthxClaim(utils.GetTestUserId(), utils.GetTestUserName(),
-		utils.GetTestAccountId(), utils.GetTestUserName(),
-		utils.GetTestEnvironmentId(), false, "zone_id", "zone_url")
+	accounts := make([]njwt.UserAccountClaim, 0)
+	accounts = append(accounts, njwt.UserAccountClaim{
+		Id:   utils.GetTestAccountId(),
+		Name: utils.GetTestAccountName(),
+		Role: "Admin",
+	})
+	return njwt.NewAuthxClaim(
+		utils.GetTestUserId(),
+		utils.GetTestUserName(),
+		accounts[0].Id,
+		accounts[0].Name,
+		utils.GetTestEnvironmentId(),
+		accounts[0].Role == "Admin",
+		"zone_id",
+		"zone_url",
+		accounts)
 }
 
 func CreateTestIncomingContext(header string, token string) (context.Context, context.CancelFunc) {

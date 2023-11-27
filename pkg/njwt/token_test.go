@@ -24,7 +24,27 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
+// GenerateTestAuthxClaim returns a random AuthxClaim to use in the tests
+func GenerateTestAuthxClaim() *AuthxClaim {
+	accounts := make([]UserAccountClaim, 0)
+	accounts = append(accounts, UserAccountClaim{
+		Id:   utils.GetTestAccountId(),
+		Name: utils.GetTestAccountName(),
+		Role: "Admin",
+	})
+	return NewAuthxClaim(
+		utils.GetTestUserId(),
+		utils.GetTestUserName(),
+		accounts[0].Id,
+		accounts[0].Name,
+		utils.GetTestEnvironmentId(),
+		accounts[0].Role == "Admin",
+		"zone_id",
+		"zone_url",
+		accounts)
+}
+
+var _ = ginkgo.Describe("njwt Token Manager tests", func() {
 	ginkgo.Context("Check token manager generator", func() {
 		tokenMgr := New()
 
@@ -54,8 +74,8 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 		})
 
 		ginkgo.It("The recover claim with personal claim", func() {
-			pc := NewAuthxClaim("userID", "username", utils.GetTestAccountId(), utils.GetTestUserName(),
-				utils.GetTestEnvironmentId(), true, "zoneID", "zoneURL")
+
+			pc := GenerateTestAuthxClaim()
 			claim := NewClaim("tt", time.Hour, pc)
 
 			secret := "secret"
@@ -94,8 +114,7 @@ var _ = ginkgo.Describe("NJWT Token Manager tests", func() {
 	ginkgo.Context("working with unverified tokens", func() {
 		tokenMgr := New()
 		ginkgo.It("should be able to retrieve raw information from a token", func() {
-			pc := NewAuthxClaim("userID", "username", utils.GetTestAccountId(), utils.GetTestUserName(),
-				utils.GetTestEnvironmentId(), true, "zoneID", "zoneURL")
+			pc := GenerateTestAuthxClaim()
 			claim := NewClaim("tt", time.Hour, pc)
 
 			secret := "secret"
