@@ -176,9 +176,7 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 	var userAccounts []njwt.UserAccountClaim
 	accounts, exists := md[helper.AccountsKey]
 	if exists {
-		// TODO: review error
-		userAccounts, _ = njwt.StringToAccounts(accounts[0])
-
+		userAccounts = njwt.StringToAccounts(accounts[0])
 	}
 
 	return &njwt.ExtendedAuthxClaim{

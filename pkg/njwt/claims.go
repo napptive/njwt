@@ -88,21 +88,19 @@ func (ac *AuthxClaim) AccountsToString() (string, error) {
 	return accountStr, nil
 }
 
-func StringToAccounts(str string) ([]UserAccountClaim, error) {
+func StringToAccounts(str string) []UserAccountClaim {
 	var accounts []UserAccountClaim
 	err := json.Unmarshal([]byte(str), &accounts)
 	if err != nil {
-		// TODO: return an error
 		log.Error().Err(err).Msg("error converting string to authx claim")
 	}
-	return accounts, err
+	return accounts
 }
 
 // ToMap transforms the claim into a key-value map.
 func (ac *AuthxClaim) ToMap() map[string]string {
 	accounts, err := ac.AccountsToString()
 	if err != nil {
-		// TODO: return an error
 		log.Error().Err(err).Msg("error converting authx claim to a map")
 	}
 	return map[string]string{
