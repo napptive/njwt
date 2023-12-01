@@ -152,6 +152,8 @@ func (ac *AuthxClaim) IsAuthorized(accountName string, adminRoleRequired bool) b
 		if account.Name == accountName {
 			if adminRoleRequired {
 				authorized = account.Role == "Admin"
+			} else {
+				authorized = true
 			}
 			return authorized
 		}
