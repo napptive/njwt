@@ -54,15 +54,15 @@ type AuthxClaim struct {
 	// Username is the unique name of the user, currently the GitHub account name.
 	Username string
 	// AccountID with the actual account identifier
-	// Deprecated: uses EnvironmentAccountID
+	// Deprecated: uses EnvironmentAccount
 	AccountID string
 	// AccountName with the name of the account
 	// Deprecated: uses Accounts info
 	AccountName string
 	// EnvironmentID with the actual environment identifier
 	EnvironmentID string
-	// EnvironmentAccountID with the actual account identifier
-	EnvironmentAccountID string
+	// EnvironmentAccount with the actual account identifier
+	EnvironmentAccount string
 	// AccountAdmin with the admin account
 	// Deprecated: uses Accounts info
 	AccountAdmin bool
@@ -89,16 +89,16 @@ func NewAuthxClaim(userID string, username string,
 	environmentID string, accountAdmin bool,
 	zoneID string, zoneURL string, accounts []UserAccountClaim) *AuthxClaim {
 	return &AuthxClaim{
-		UserID:               userID,
-		Username:             username,
-		AccountID:            accountID,
-		AccountName:          accountName,
-		EnvironmentID:        environmentID,
-		AccountAdmin:         accountAdmin,
-		ZoneID:               zoneID,
-		ZoneURL:              zoneURL,
-		EnvironmentAccountID: accountID,
-		Accounts:             accounts,
+		UserID:             userID,
+		Username:           username,
+		AccountID:          accountID,
+		AccountName:        accountName,
+		EnvironmentID:      environmentID,
+		AccountAdmin:       accountAdmin,
+		ZoneID:             zoneID,
+		ZoneURL:            zoneURL,
+		EnvironmentAccount: accountID,
+		Accounts:           accounts,
 	}
 }
 
@@ -135,7 +135,7 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 		helper.AccountAdminKey:       strconv.FormatBool(ac.AccountAdmin),
 		helper.ZoneIDKey:             ac.ZoneID,
 		helper.ZoneURLKey:            ac.ZoneURL,
-		helper.EnvironmentAccountKey: ac.EnvironmentAccountID,
+		helper.EnvironmentAccountKey: ac.EnvironmentAccount,
 		helper.AccountsKey:           accounts,
 	}
 }
@@ -165,17 +165,17 @@ func (ac *AuthxClaim) IsAuthorized(accountName string, adminRoleRequired bool) b
 	return authorized
 }
 
-// GetCurrentAccountName returns the EnvironmentAccountID name
+// GetCurrentAccountName returns the EnvironmentAccount name
 // The AccountName is a deprecated field, the name can be retrieved from the accounts list
 func (ac *AuthxClaim) GetCurrentAccountName() (*string, error) {
 	accountName := ""
 	for _, account := range ac.Accounts {
-		if account.Id == ac.EnvironmentAccountID {
+		if account.Id == ac.EnvironmentAccount {
 			accountName = account.Name
 			return &accountName, nil
 		}
 	}
-	return nil, nerrors.NewInternalError("error getting account name from claim. Account %s not found in the user accounts", ac.EnvironmentAccountID)
+	return nil, nerrors.NewInternalError("error getting account name from claim. Account %s not found in the user accounts", ac.EnvironmentAccount)
 }
 
 // GetAuthxClaim returns the AuthxClaim section of the claim.
