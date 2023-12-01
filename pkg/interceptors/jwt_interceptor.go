@@ -155,6 +155,11 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 	if exists {
 		envIDVal = envID[0]
 	}
+	envAccountIDVal := ""
+	envAccountID, exists := md[helper.EnvironmentAccountKey]
+	if exists {
+		envAccountIDVal = envAccountID[0]
+	}
 	accountAdminVal := false
 	accountAdmin, exists := md[helper.AccountAdminKey]
 	if exists && accountAdmin[0] == "true" {
@@ -185,15 +190,16 @@ func GetClaimFromContext(ctx context.Context) (*njwt.ExtendedAuthxClaim, error) 
 			IssuedAt: issuedAt,
 		},
 		AuthxClaim: njwt.AuthxClaim{
-			UserID:        userID[0],
-			Username:      username[0],
-			AccountID:     accountIDVal,
-			AccountName:   accountNameVal,
-			EnvironmentID: envIDVal,
-			AccountAdmin:  accountAdminVal,
-			ZoneID:        zoneIDVal,
-			ZoneURL:       zoneURLVal,
-			Accounts:      userAccounts,
+			UserID:               userID[0],
+			Username:             username[0],
+			AccountID:            accountIDVal,
+			AccountName:          accountNameVal,
+			EnvironmentID:        envIDVal,
+			EnvironmentAccountID: envAccountIDVal,
+			AccountAdmin:         accountAdminVal,
+			ZoneID:               zoneIDVal,
+			ZoneURL:              zoneURLVal,
+			Accounts:             userAccounts,
 		},
 	}, nil
 }
