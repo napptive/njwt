@@ -50,7 +50,7 @@ func NewClaim(issuer string, expiration time.Duration, pc interface{}) *Claim {
 type AuthxClaim struct {
 	// UserID internal napptive user identifier.
 	UserID string
-	// Username is the unique name of the user, currently the github account name.
+	// Username is the unique name of the user, currently the GitHub account name.
 	Username string
 	// AccountID with the actual account identifier
 	AccountID string
@@ -77,6 +77,25 @@ type UserAccountClaim struct {
 	Name string
 	// Role with the user role in the account
 	Role string
+}
+
+// NewAuthxClaim creates a new instance of AuthxClaim.
+func NewAuthxClaim(userID string, username string,
+	accountID string, accountName string,
+	environmentID string, accountAdmin bool,
+	zoneID string, zoneURL string, accounts []UserAccountClaim) *AuthxClaim {
+	return &AuthxClaim{
+		UserID:             userID,
+		Username:           username,
+		AccountID:          accountID,
+		AccountName:        accountName,
+		EnvironmentID:      environmentID,
+		AccountAdmin:       accountAdmin,
+		ZoneID:             zoneID,
+		ZoneURL:            zoneURL,
+		EnvironmentAccount: accountID,
+		Accounts:           accounts,
+	}
 }
 
 func (ac *AuthxClaim) AccountsToString() (string, error) {
@@ -117,30 +136,27 @@ func (ac *AuthxClaim) ToMap() map[string]string {
 	}
 }
 
-// NewAuthxClaim creates a new instance of AuthxClaim.
-func NewAuthxClaim(userID string, username string,
-	accountID string, accountName string,
-	environmentID string, accountAdmin bool,
-	zoneID string, zoneURL string, accounts []UserAccountClaim) *AuthxClaim {
-	return &AuthxClaim{
-		UserID:             userID,
-		Username:           username,
-		AccountID:          accountID,
-		AccountName:        accountName,
-		EnvironmentID:      environmentID,
-		AccountAdmin:       accountAdmin,
-		ZoneID:             zoneID,
-		ZoneURL:            zoneURL,
-		EnvironmentAccount: accountID,
-		Accounts:           accounts,
-	}
-}
-
 // Print the contents of the claim through the logger.
 func (ac *AuthxClaim) Print() {
 	log.Info().Str("user_id", ac.UserID).Str("username", ac.Username).
 		Str("account_id", ac.AccountID).Str("account_name", ac.AccountName).
 		Str("environment_id", ac.EnvironmentID).Bool("account_admin", ac.AccountAdmin).Str("zone_id", ac.ZoneID).Str("zone_url", ac.ZoneURL).Msg("AuthxClaim")
+}
+
+// IsAuthorized checks if the user (claim) has permissions to operate in an account
+func (ac *AuthxClaim) IsAuthorized(accountName string, adminRoleRequired bool) bool {
+
+	authorized := false
+
+	for _, account := range ac.Accounts {
+		if account.Name == accountName {
+			if adminRoleRequired {
+				authorized = account.Role == "Admin"
+			}
+			return authorized
+		}
+	}
+	return authorized
 }
 
 // GetAuthxClaim returns the AuthxClaim section of the claim.
