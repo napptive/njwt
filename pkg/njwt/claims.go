@@ -17,6 +17,8 @@
 package njwt
 
 import (
+	"encoding/json"
+	"github.com/napptive/nerrors/pkg/nerrors"
 	"strconv"
 	"time"
 
@@ -49,50 +51,92 @@ func NewClaim(issuer string, expiration time.Duration, pc interface{}) *Claim {
 type AuthxClaim struct {
 	// UserID internal napptive user identifier.
 	UserID string
-	// Username is the unique name of the user, currently the github account name.
+	// Username is the unique name of the user, currently the GitHub account name.
 	Username string
 	// AccountID with the actual account identifier
+	// Deprecated: uses EnvironmentAccountID
 	AccountID string
 	// AccountName with the name of the account
+	// Deprecated: uses Accounts info
 	AccountName string
 	// EnvironmentID with the actual environment identifier
 	EnvironmentID string
+	// EnvironmentAccountID with the actual account identifier
+	EnvironmentAccountID string
 	// AccountAdmin with the admin account
+	// Deprecated: uses Accounts info
 	AccountAdmin bool
 	// ZoneID with the zone identifier
 	ZoneID string
 	// ZoneURL with the base URL of the current zone.
 	ZoneURL string
+	// Accounts with the information of the accounts to which a user belongs
+	Accounts []UserAccountClaim
 }
 
-// ToMap transforms the claim into a key-value map.
-func (ac *AuthxClaim) ToMap() map[string]string {
-	return map[string]string{
-		helper.UserIDKey:        ac.UserID,
-		helper.UsernameKey:      ac.Username,
-		helper.AccountNameKey:   ac.AccountName,
-		helper.AccountIDKey:     ac.AccountID,
-		helper.EnvironmentIDKey: ac.EnvironmentID,
-		helper.AccountAdminKey:  strconv.FormatBool(ac.AccountAdmin),
-		helper.ZoneIDKey:        ac.ZoneID,
-		helper.ZoneURLKey:       ac.ZoneURL,
-	}
+type UserAccountClaim struct {
+	// Id with the account identifier
+	Id string
+	// Name with the account name
+	Name string
+	// Role with the user role in the account
+	Role string
 }
 
 // NewAuthxClaim creates a new instance of AuthxClaim.
 func NewAuthxClaim(userID string, username string,
 	accountID string, accountName string,
 	environmentID string, accountAdmin bool,
-	zoneID string, zoneURL string) *AuthxClaim {
+	zoneID string, zoneURL string, accounts []UserAccountClaim) *AuthxClaim {
 	return &AuthxClaim{
-		UserID:        userID,
-		Username:      username,
-		AccountID:     accountID,
-		AccountName:   accountName,
-		EnvironmentID: environmentID,
-		AccountAdmin:  accountAdmin,
-		ZoneID:        zoneID,
-		ZoneURL:       zoneURL,
+		UserID:               userID,
+		Username:             username,
+		AccountID:            accountID,
+		AccountName:          accountName,
+		EnvironmentID:        environmentID,
+		AccountAdmin:         accountAdmin,
+		ZoneID:               zoneID,
+		ZoneURL:              zoneURL,
+		EnvironmentAccountID: accountID,
+		Accounts:             accounts,
+	}
+}
+
+func (ac *AuthxClaim) AccountsToString() (string, error) {
+	account, err := json.Marshal(ac.Accounts)
+	if err != nil {
+		return "", err
+	}
+	accountStr := string(account)
+	return accountStr, nil
+}
+
+func StringToAccounts(str string) []UserAccountClaim {
+	var accounts []UserAccountClaim
+	err := json.Unmarshal([]byte(str), &accounts)
+	if err != nil {
+		log.Error().Err(err).Msg("error converting string to authx claim")
+	}
+	return accounts
+}
+
+// ToMap transforms the claim into a key-value map.
+func (ac *AuthxClaim) ToMap() map[string]string {
+	accounts, err := ac.AccountsToString()
+	if err != nil {
+		log.Error().Err(err).Msg("error converting authx claim to a map")
+	}
+	return map[string]string{
+		helper.UserIDKey:             ac.UserID,
+		helper.UsernameKey:           ac.Username,
+		helper.AccountNameKey:        ac.AccountName,
+		helper.AccountIDKey:          ac.AccountID,
+		helper.EnvironmentIDKey:      ac.EnvironmentID,
+		helper.AccountAdminKey:       strconv.FormatBool(ac.AccountAdmin),
+		helper.ZoneIDKey:             ac.ZoneID,
+		helper.ZoneURLKey:            ac.ZoneURL,
+		helper.EnvironmentAccountKey: ac.EnvironmentAccountID,
+		helper.AccountsKey:           accounts,
 	}
 }
 
@@ -101,6 +145,37 @@ func (ac *AuthxClaim) Print() {
 	log.Info().Str("user_id", ac.UserID).Str("username", ac.Username).
 		Str("account_id", ac.AccountID).Str("account_name", ac.AccountName).
 		Str("environment_id", ac.EnvironmentID).Bool("account_admin", ac.AccountAdmin).Str("zone_id", ac.ZoneID).Str("zone_url", ac.ZoneURL).Msg("AuthxClaim")
+}
+
+// IsAuthorized checks if the user (claim) has permissions to operate in an account
+func (ac *AuthxClaim) IsAuthorized(accountName string, adminRoleRequired bool) bool {
+
+	authorized := false
+
+	for _, account := range ac.Accounts {
+		if account.Name == accountName {
+			if adminRoleRequired {
+				authorized = account.Role == "Admin"
+			} else {
+				authorized = true
+			}
+			return authorized
+		}
+	}
+	return authorized
+}
+
+// GetCurrentAccountName returns the EnvironmentAccountID name
+// The AccountName is a deprecated field, the name can be retrieved from the accounts list
+func (ac *AuthxClaim) GetCurrentAccountName() (*string, error) {
+	accountName := ""
+	for _, account := range ac.Accounts {
+		if account.Id == ac.EnvironmentAccountID {
+			accountName = account.Name
+			return &accountName, nil
+		}
+	}
+	return nil, nerrors.NewInternalError("error getting account name from claim. Account %s not found in the user accounts", ac.EnvironmentAccountID)
 }
 
 // GetAuthxClaim returns the AuthxClaim section of the claim.

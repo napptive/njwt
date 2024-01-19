@@ -42,5 +42,7 @@ const (
 	// OriginalUsernameKey with the key that will be injected in the context metadata for signup claims corresponding with the orignal username in the target provider
 	OriginalUsernameKey = "original_username"
 	// IdentityProviderKey with the key that will be injected in the context metadata for signup claims corresponding with the the target provider
-	IdentityProviderKey = "identity_provider"
+	IdentityProviderKey   = "identity_provider"
+	EnvironmentAccountKey = "environment_account_id"
+	AccountsKey           = "accounts"
 )

@@ -21,8 +21,6 @@ import (
 	"syreclabs.com/go/faker"
 )
 
-
-
 // GetTestUserId returns a random UserId
 func GetTestUserId() string {
 	return xid.New().String()
@@ -40,5 +38,9 @@ func GetTestEnvironmentId() string {
 
 // GetTestUserName returns a random Username
 func GetTestUserName() string {
+	return faker.Internet().UserName()
+}
+
+func GetTestAccountName() string {
 	return faker.Internet().UserName()
 }
